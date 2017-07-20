@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="meal_types">
+        <item>Vegiterian Meal</item>
+        <item>Eggeterian</item>
+        <item>Non-Vegiterian</item>
+        <item>Jain Meal</item>
+    </string-array>
+
+    <string-array name="age_list">
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+    </string-array>
+    <string-array name="gender_list">
+        <item>Male</item>
+        <item>Female</item>
+        </string-array>
+
+    <string-array name="nonveg_food_types">
+    <item>Chicken</item>
+    <item>Meat</item>
+     <item>Pork</item>
+     <item>Lamb</item>
+     <item>All Non-veg</item>
+    </string-array>
+
+    <string-array name="activity_levels">
+    <item>Sedentary</item>
+    <item>Moderately active</item>
+    <item>Vigorously active</item>
+    </string-array>
+
+    <string-array name="presc_nutri_list">
+        <item>Vitamin A</item>
+        <item>Vitamin B</item>
+        <item>Vitamin C</item>
+        <item>Vitamin E</item>
+        <item>Omega 3 Fatty Acid</item>
+        <item>Omega 6 Fatty Acid</item>
+        <item>Potassium</item>
+        <item>Sodium</item>
+        <item>Copper</item>
+        <item>Iron</item>
+    </string-array>
+
+
+</resources>

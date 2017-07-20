@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_card_3"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.techticz.app.ui.activity.HealthDetailFormActivity"
+    tools:showIn="@layout/activity_health_detail_form">
+
+    <LinearLayout
+        android:id="@+id/ll_profile_item_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="16dp"
+        android:background="@color/card_content_background"
+        android:orientation="vertical">
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            ></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+        <include
+            layout="@layout/profile_info_item_layout"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"></include>
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
