@@ -24,6 +24,7 @@ import com.techticz.app.network.Request;
 import com.techticz.app.network.RequestMethod;
 import com.techticz.app.network.ResponseContainer;
 import com.techticz.app.network.ServiceRequest;
+import com.techticz.app.utility.CommonUtils;
 import com.techticz.dietchart.backend.blobApi.BlobApi;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadRequest;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
@@ -267,7 +268,7 @@ public class APIRepository implements IAppRepository {
 
     @Override
     public ImageUploadResponse uploadImage(BaseInteractor interactor, Bitmap bitmap, String imageName) {
-// Important! you wanna rescale your bitmap (e.g. with Bitmap.createScaledBitmap)
+/*// Important! you wanna rescale your bitmap (e.g. with Bitmap.createScaledBitmap)
         // as with full-size pictures the base64 representation would not fit in memory
 
         // encode bitmap into byte array (very resource-wasteful!)
@@ -295,7 +296,21 @@ public class APIRepository implements IAppRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return response;*/
+
+        // Upload via AppEngine Endpoint (ImageUploadRequest is a generated model)
+        ImageUploadRequest image = new ImageUploadRequest();
+        image.setImageData(CommonUtils.getByteArrayFromBitmap(bitmap,true).toString());
+        image.setImageName(imageName);
+        image.setMimeType("image/png");
+        ImageUploadResponse response = null;
+        try {
+            response = blobApi.uploadImage(image).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return response;
+
     }
 
     @Override

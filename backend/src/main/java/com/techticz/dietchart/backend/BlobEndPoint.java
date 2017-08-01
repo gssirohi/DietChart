@@ -79,7 +79,24 @@ public class BlobEndPoint {
         // parse BlopUploadServlet's Json response
         ImageUploadResponse response = new Gson().fromJson(responseBody, ImageUploadResponse.class);
 
-        return null;
+        return response;
+    }
+
+    @ApiMethod(name = "downloadImage",
+            path = "downloadImage",
+            httpMethod = ApiMethod.HttpMethod.GET)
+    public ImageDownloadResponse downloadImageFromBlobStore(ImageDownloadRequest imageRequest) throws IOException {
+        String uploadUrl = "serve?blob-key="+imageRequest.getBlobKey();
+        URL url = new URL(uploadUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setDoOutput(true);
+        connection.setRequestMethod("GET");
+
+        String responseBody = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
+        ImageDownloadResponse res = new ImageDownloadResponse();
+        res.setBlobKey(imageRequest.getBlobKey());
+        res.setData(responseBody);
+        return res;
     }
 
 }

@@ -39,6 +39,7 @@ public class CreateFoodInteractor extends BaseInteractor implements CreateFoodUs
             ImageUploadResponse blob = appRepository.uploadImage(this, food.getBitmap(), food.getName().trim() + ".jpg");
             food.setBlobServingUrl(blob.getServingUrl());
             food.setBlobKey(blob.getBlobKey());
+            AppLogger.i(this,"BLOB KEY:"+food.getBlobKey());
             appRepository.updateFood(this,food);
             dismissDialog();
             if (!isCancelled())

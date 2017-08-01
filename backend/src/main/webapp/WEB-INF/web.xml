@@ -30,6 +30,14 @@
         <servlet-name>BlobUploadServlet</servlet-name>
         <url-pattern>/blob/upload/*</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>BlobDownloadServlet</servlet-name>
+        <servlet-class>com.techticz.dietchart.backend.BlobDownloadServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BlobUploadServlet</servlet-name>
+        <url-pattern>/blob/serve</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

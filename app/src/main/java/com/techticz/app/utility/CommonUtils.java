@@ -2,12 +2,14 @@ package com.techticz.app.utility;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.provider.Settings;
 import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -19,6 +21,8 @@ import java.util.Random;
  * Created by gssirohi on 28/8/16.
  */
 public class CommonUtils {
+
+    private static final int PRODUCT_IMAGE_WIDTH = 400;
 
     public static String getDeviceId(Context context) {
         try {
@@ -115,5 +119,30 @@ public class CommonUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         String date = sdf.format(dob.getTime());
         return date;
+    }
+
+    public static byte[] getByteArrayFromBitmap(Bitmap bitmap, boolean scale) {
+
+        Bitmap scaledBitmap = bitmap;
+        if (scale) {
+            scaledBitmap = scale(bitmap);
+        }
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+    public static  Bitmap scale (Bitmap source){
+        int w = source.getWidth();
+        double factor = 1.0;
+        if (w > PRODUCT_IMAGE_WIDTH) {
+            factor = ((double)w) / ((double)PRODUCT_IMAGE_WIDTH);
+        }
+        else {
+
+        }
+
+        int dw = new Double((((double)factor) * ((double)(source.getWidth())))).intValue();
+        int dh = new Double((((double)factor) * ((double)(source.getHeight())))).intValue();
+        return Bitmap.createScaledBitmap(source, dw, dh, false);
     }
 }
