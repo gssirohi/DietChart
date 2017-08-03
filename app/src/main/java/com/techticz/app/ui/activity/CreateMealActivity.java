@@ -2,15 +2,17 @@ package com.techticz.app.ui.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -22,19 +24,29 @@ import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.FoodCategory;
 import com.techticz.app.constant.FoodType;
 import com.techticz.app.constant.Key;
+import com.techticz.app.constant.LaunchMode;
 import com.techticz.app.constant.Routines;
 import com.techticz.app.constant.UseCases;
 import com.techticz.app.domain.interactor.CreateMealUseCase;
+import com.techticz.app.domain.interactor.FetchBlobUseCase;
 import com.techticz.app.domain.interactor.FetchFoodListUseCase;
+import com.techticz.app.domain.interactor.FetchMealListUseCase;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
-import com.techticz.app.domain.model.pojo.MealRoutine;
 import com.techticz.app.ui.customview.FoodListItemView;
+import com.techticz.app.utility.CommonUtils;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreateMealActivity extends BaseActivity implements FetchFoodListUseCase.Callback, CreateMealUseCase.Callback {
+import static com.techticz.app.constant.Key.GET_FROM_GALLERY;
+import static com.techticz.app.constant.LaunchMode.CREATE;
+import static com.techticz.app.constant.LaunchMode.EDIT;
+import static com.techticz.app.constant.LaunchMode.VIEW;
+
+public class CreateMealActivity extends BaseActivity implements FetchFoodListUseCase.Callback, CreateMealUseCase.Callback, FetchMealListUseCase.Callback, FetchBlobUseCase.Callback {
 
     private TextInputLayout til_meal_name;
     private TextInputLayout til_meal_desc;
@@ -44,11 +56,17 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
     private Button b_add_food;
     private LinearLayout ll_food_container;
     private LinearLayout ll_nutri_container;
-    private int mealPlanId;
-    private int routineId;
+    private long mealPlanId;
+    private long routineId;
     private int day;
-    private Long mealId;
+    private long mealId;
     private FetchFoodListUseCase fetchFoodUseCase;
+    private Meal meal;
+    private ImageView iv_meal;
+    private Bitmap mealBitmap;
+    private FloatingActionButton fab_meal;
+    private LaunchMode mode;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +75,8 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab_meal = (FloatingActionButton) findViewById(R.id.fab);
+        fab_meal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 handleSubmitClick();
@@ -66,11 +84,21 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         });
         initData();
         initUI();
+        provideData();
+    }
+
+    private void provideData() {
+        if(mealId != 0){
+            FetchMealListUseCase usecase = (FetchMealListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_LIST);
+            usecase.execute(this,true,"",new long[]{mealId});
+        }
     }
 
     private void initData() {
-        mealPlanId = getIntent().getIntExtra("mealPlanId", 0);
+        mealPlanId = getIntent().getLongExtra("mealPlanId", 0);
+        mealId = getIntent().getLongExtra("mealId", 0);
         routineId = getIntent().getIntExtra("routineId", 0);
+        mode = LaunchMode.getById(getIntent().getIntExtra("mode",0));
         day = getIntent().getIntExtra("day", -1);
     }
 
@@ -83,6 +111,13 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         b_add_food = (Button) findViewById(R.id.b_meal_add_food);
         ll_food_container = (LinearLayout) findViewById(R.id.ll_food_item);
         ll_nutri_container = (LinearLayout) findViewById(R.id.ll_nutritient_view_container);
+        iv_meal = (ImageView)findViewById(R.id.iv_meal);
+        iv_meal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleImageClick(view);
+            }
+        });
 
         b_add_food.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,6 +145,38 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
                 handlePrefRoutineClick();
             }
         });
+        changeMode(mode);
+    }
+
+    private void changeMode(LaunchMode mode) {
+        this.mode = mode;
+        if(mode == VIEW){
+            fab_meal.setImageResource(R.drawable.ic_arrow_forward);
+            updateEditability(false);
+        } else if(mode == EDIT){
+            fab_meal.setImageResource(R.drawable.ic_check);
+            updateEditability(true);
+        } else if(mode == CREATE) {
+            fab_meal.setImageResource(R.drawable.ic_check);
+            updateEditability(true);
+        }
+
+    }
+
+    private void handleImageClick(View view) {
+        startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+                , GET_FROM_GALLERY);
+    }
+
+    private void updateEditability(boolean isEditable) {
+        til_meal_name.getEditText().setEnabled(isEditable);
+        til_meal_desc.getEditText().setEnabled(isEditable);
+        til_meal_type.getEditText().setEnabled(isEditable);
+        til_meal_category.getEditText().setEnabled(isEditable);
+        til_meal_pref_routine.getEditText().setEnabled(isEditable);
+        b_add_food.setEnabled(isEditable);
+        b_add_food.setClickable(isEditable);
+        iv_meal.setClickable(isEditable);
     }
 
 
@@ -180,7 +247,12 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
     }
 
     private void handleSubmitClick() {
-        //create Meal in DB
+
+        if(mode == VIEW) {
+            changeMode(EDIT);
+            return;
+        }
+
         if (!isvalidated()) {
             return;
         }
@@ -208,7 +280,7 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
             foods.add(uid);
         }
         meal.setFoodIds(foods);
-
+        meal.setBitmap(mealBitmap);
         CreateMealUseCase usecase = (CreateMealUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_AND_ADD_MEAL);
         usecase.execute(this, meal, true);
     }
@@ -252,22 +324,36 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         if (requestCode == Key.BROWSE_FOOD && resultCode == Activity.RESULT_OK) {
             Long foodId = data.getLongExtra("foodId", 0);
             if (foodId != 0)
-                fetchFoodWithId(foodId);
+                fetchFoodWithIds(new Long[]{foodId});
+        } else if(requestCode== GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+            Uri selectedImage = data.getData();
+            Bitmap bitmap = null;
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                iv_meal.setImageBitmap(bitmap);
+                mealBitmap = bitmap;
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 
-    private void fetchFoodWithId(Long foodId) {
+    private void fetchFoodWithIds(Long[] foodIds) {
         if (fetchFoodUseCase == null) {
             fetchFoodUseCase = (FetchFoodListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_FOOD_LIST);
         }
-        Long[] ids = new Long[1];
-        ids[0] = foodId;
-        fetchFoodUseCase.execute(this, false, "", ids);
+
+        fetchFoodUseCase.execute(this, false, "", foodIds);
     }
 
-    public static Intent getCallingIntent(Activity context, int mealPlanId) {
+    public static Intent getCallingIntent(Activity context, long mealPlanId,LaunchMode mode) {
         Intent i = new Intent(context, CreateMealActivity.class);
         i.putExtra("mealPlanId", mealPlanId);
+        i.putExtra("mode", mode.code);
         return i;
     }
 
@@ -277,8 +363,52 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
     }
 
     @Override
+    public void onBlobFetched(String blobKey, Bitmap bitmap) {
+        if(bitmap != null)
+        iv_meal.setImageBitmap(bitmap);
+    }
+
+    @Override
+    public void onMealListFetched(List<Meal> meals, String searchKey) {
+        this.meal = meals.get(0);
+        loadUIwithMeal();
+    }
+
+    private void loadUIwithMeal() {
+        til_meal_name.getEditText().setText(meal.getName());
+        til_meal_desc.getEditText().setText(meal.getDesc());
+        til_meal_type.getEditText().setText(FoodType.getById(meal.getType()).lable);
+        til_meal_category.getEditText().setText(FoodCategory.getById(meal.getType()).lable);
+        setPrefRoutinesFromCode(til_meal_pref_routine,meal.getPrefRoutine());
+        fetchFoodWithIds(CommonUtils.getLongArrayFromList(meal.getFoodIds()));
+        loadMealImage();
+    }
+
+    private void loadMealImage() {
+        FetchBlobUseCase usecase = (FetchBlobUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_BLOB);
+        usecase.execute(this,false,meal.getBlobKey(),meal.getBlobServingUrl());
+    }
+
+
+    private void setPrefRoutinesFromCode(TextInputLayout til, List<Integer> prefRoutine) {
+        if(prefRoutine == null || prefRoutine.isEmpty()) {
+            til.getEditText().setText("");
+            return;
+        }
+        CharSequence[] list = new CharSequence[prefRoutine.size()];
+        int i = 0;
+        for(Integer r: prefRoutine){
+            Routines  rt = Routines.getById(r);
+            if(rt != null){
+                list[i++] = rt.lable;
+            }
+        }
+        setMealItemValues(til,list);
+    }
+
+    @Override
     public void onMealCreated(Meal meal) {
-        if (meal != null) {
+        if (meal != null && mode == CREATE) {
             mealId = meal.getUid();
             Intent i = new Intent();
             i.putExtra("mealId", meal.getUid());
@@ -293,9 +423,18 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
     @Override
     public void onFoodListFetched(List<Food> foods, String searchKey) {
         //basically just one food fetched
-        Food food = foods.get(0);
-        FoodListItemView view = new FoodListItemView(this);
-        view.fillDetails(food);
-        ll_food_container.addView(view);
+        for(Food f: foods) {
+            FoodListItemView view = new FoodListItemView(this);
+            view.fillDetails(f);
+            ll_food_container.addView(view);
+        }
+    }
+
+    public static Intent getCallingIntent(Activity context, long planId, long mealId,LaunchMode mode) {
+        Intent i = new Intent(context, CreateMealActivity.class);
+        i.putExtra("mealPlanId", planId);
+        i.putExtra("mealId", mealId);
+        i.putExtra("mode", mode.code);
+        return i;
     }
 }

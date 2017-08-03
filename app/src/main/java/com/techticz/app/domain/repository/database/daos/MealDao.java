@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -20,7 +21,7 @@ public interface MealDao {
     List<Meal> getAll();
 
     @Query("SELECT * FROM " + Meal.TableName + " WHERE uid IN (:mealIds)")
-    List<Meal> loadAllByIds(int[] mealIds);
+    List<Meal> loadAllByIds(long[] mealIds);
 
     @Insert
     void insertAll(Meal... meals);
@@ -43,5 +44,6 @@ public interface MealDao {
     @Query("SELECT * FROM " + Meal.TableName + " WHERE name LIKE :searchKey")
     List<Meal> getAllContains(String searchKey);
 
-
+    @Update
+    int update(Meal meal);
 }

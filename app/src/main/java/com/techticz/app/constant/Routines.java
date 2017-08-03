@@ -60,4 +60,13 @@ public enum Routines {
         return names;
     }
 
+    public static Routines getById(Integer code) {
+        List<Routines> list = getAll();
+        for(Routines r : list){
+            if(r.code == code){
+                return r;
+            }
+        }
+        return null;
+    }
 }

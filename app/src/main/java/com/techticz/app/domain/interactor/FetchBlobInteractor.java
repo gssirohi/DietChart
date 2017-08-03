@@ -1,7 +1,10 @@
 package com.techticz.app.domain.interactor;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import com.google.api.client.util.IOUtils;
 import com.techticz.app.domain.exception.AppRepositoryException;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
@@ -9,18 +12,23 @@ import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
 import com.techticz.app.utility.AppLogger;
-import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
+import com.techticz.dietchart.backend.myApi.model.SystemHealth;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 
 /**
  * Created by gssirohi on 15/7/16.
  */
-public class CreateMealInteractor extends BaseInteractor implements CreateMealUseCase {
+public class FetchBlobInteractor extends BaseInteractor implements FetchBlobUseCase {
 
     private IAppRepository appRepository;
     private Callback callback;
-    private Meal meal;
+        private String blobKey;
+    private String servingUrl;
 
-    public CreateMealInteractor(Context context, IInteractorExecutor interactorExecutor, IMainThreadExecutor mainThreadExecutor, IAppRepository appRepository) {
+    public FetchBlobInteractor(Context context, IInteractorExecutor interactorExecutor, IMainThreadExecutor mainThreadExecutor, IAppRepository appRepository) {
         super(context, interactorExecutor, mainThreadExecutor);
         this.appRepository = appRepository;
     }
@@ -31,29 +39,27 @@ public class CreateMealInteractor extends BaseInteractor implements CreateMealUs
 
         try {
             Thread.sleep(300);
-            final long mealId;
-            if(meal.getUid() != null && meal.getUid() != 0 ) {
-                mealId = appRepository.updateMeal(this,meal);
-            } else {
-                mealId = appRepository.createMeal(this, meal);
+             Bitmap response = null;
+            try {
+                response = appRepository.fetchBlob(this,blobKey,servingUrl);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
-            meal.setUid(mealId);
-            ImageUploadResponse blob = appRepository.uploadImage(this, meal.getBitmap(), meal.getName().trim());
-            meal.setBlobServingUrl(blob.getServingUrl());
-            meal.setBlobKey(blob.getBlobKey());
-            AppLogger.i(this,"BLOB KEY:"+meal.getBlobKey());
-            appRepository.updateMeal(this,meal);
             dismissDialog();
-            if (!isCancelled())
+            if (!isCancelled()) {
+
+                final Bitmap finalResponse = response;
                 getMainThreadExecutor().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onMealCreated(meal);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            callback.onBlobFetched(blobKey, finalResponse);
+                        }
+                    });
+
+            }
 
         } catch (final AppRepositoryException e) {
-            AppLogger.e(this, "Error on create meal");
+            AppLogger.e(this, "Error on fetching blob "+blobKey);
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
                     @Override
@@ -72,11 +78,12 @@ public class CreateMealInteractor extends BaseInteractor implements CreateMealUs
     }
 
     @Override
-    public void execute(Callback callback, Meal meal, boolean showLoader) {
+    public void execute(Callback callback, boolean showLoader, String blobKey,String servingUrl) {
         this.callback = callback;
-        this.meal = meal;
+        this.servingUrl = servingUrl;
+        this.blobKey = blobKey;
         if (showLoader) {
-            showDialog("Creating Meal .. ");
+            showDialog("Fetching Blob .. ");
         }
         getInteractorExecutor().performAction(this);
     }

@@ -8,6 +8,9 @@ public class AppConstants {
     public static final int MAX_CONNECTION_TIMEOUT = 120000;
     public static final boolean DEBUG_MODE = true;
     public static final String DATABASE_NAME = "DIET CHART DATABASE";
+    public static final String CLOUDINARY_CLOUD_NAME = "techticz";
+    public static final String CLOUDINARY_API_KEY = "537624983958816";
+    public static final String CLOUDINARY_API_SECRET = "R_rzXvhdyLfv7G-7y0ym5Zm2_ts";
 
     // url to point to can be changed based on build type
     public static String SUFFIX_URL = "/v1/public";

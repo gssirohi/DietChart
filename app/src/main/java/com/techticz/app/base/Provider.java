@@ -11,8 +11,10 @@ import com.techticz.app.domain.interactor.CreateFoodInteractor;
 import com.techticz.app.domain.interactor.CreateMealInteractor;
 import com.techticz.app.domain.interactor.CreateMealPlanInteractor;
 import com.techticz.app.domain.interactor.FetchAllMealsInteractor;
+import com.techticz.app.domain.interactor.FetchBlobInteractor;
 import com.techticz.app.domain.interactor.FetchFoodListInteractor;
 import com.techticz.app.domain.interactor.FetchImageInteractor;
+import com.techticz.app.domain.interactor.FetchMealListInteractor;
 import com.techticz.app.domain.interactor.FetchMealPlanListInteractor;
 import com.techticz.app.domain.interactor.FetchProductInteractor;
 import com.techticz.app.domain.interactor.FetchDayMealListInteractor;
@@ -60,6 +62,9 @@ public class Provider {
     public UseCase getUseCaseImpl(Context context, UseCases type) {
         UseCase useCase = null;
         switch (type) {
+            case FETCH_BLOB:
+                return new FetchBlobInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case CHECK_SYSTEM:
                 return new CheckSystemHealthInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
                         , getMainThreadExecutor(), getAppRepository(Repositories.API));
@@ -81,8 +86,8 @@ public class Provider {
             case FETCH_DAY_MEALS:
                 return new FetchDayMealListInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
                         , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
-            case FETCH_ALL_MEALS:
-                return new FetchAllMealsInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
+            case FETCH_MEAL_LIST:
+                return new FetchMealListInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
                         , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
             case CREATE_AND_ADD_MEAL:
                 return new CreateMealInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)

@@ -31,8 +31,9 @@ public class FetchAllMealsInteractor extends BaseInteractor implements FetchAllM
 
     @Override
     public void run() {
-
+/*
         try {
+*//*
             Thread.sleep(300);
 
             final List<Meal> meals = appRepository.getMealList(this, 100, searchKey, mealIds);
@@ -44,6 +45,7 @@ public class FetchAllMealsInteractor extends BaseInteractor implements FetchAllM
                         callback.onAllMealsFetched(meals, searchKey);
                     }
                 });
+*//*
 
         } catch (final AppRepositoryException e) {
             AppLogger.e(this, "Error on fetch routines for day " + day);
@@ -56,7 +58,7 @@ public class FetchAllMealsInteractor extends BaseInteractor implements FetchAllM
                 });
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override

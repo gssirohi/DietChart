@@ -3,6 +3,9 @@ package com.techticz.app.domain.repository;
 import android.graphics.Bitmap;
 
 import com.techticz.app.domain.interactor.CreateFoodInteractor;
+import com.techticz.app.domain.interactor.CreateMealInteractor;
+import com.techticz.app.domain.interactor.FetchBlobInteractor;
+import com.techticz.app.domain.interactor.FetchMealListInteractor;
 import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -14,6 +17,7 @@ import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
 
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -21,7 +25,7 @@ import java.util.List;
  */
 public interface IAppRepository {
 
-    public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, int[] mealIds);
+    public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, long[] mealIds);
 
     public Meal getMealById(BaseInteractor interactor, Long id);
 
@@ -54,4 +58,9 @@ public interface IAppRepository {
     ImageUploadResponse uploadImage(BaseInteractor interactor, Bitmap bitmap, String imageName);
 
     long updateFood(CreateFoodInteractor createFoodInteractor, Food food);
+
+    Bitmap fetchBlob(BaseInteractor interactor, String blobKey, String servingUrl) throws MalformedURLException;
+
+
+    long updateMeal(BaseInteractor interactor, Meal meal);
 }

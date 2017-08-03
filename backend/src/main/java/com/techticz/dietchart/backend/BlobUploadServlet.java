@@ -32,11 +32,11 @@ public class BlobUploadServlet extends HttpServlet {
 
         BlobKey blobKey = blobKeys.get(0);
 
-       // ImagesService imagesService = ImagesServiceFactory.getImagesService();
-        //ServingUrlOptions servingOptions = ServingUrlOptions.Builder.withBlobKey(blobKey);
+        ImagesService imagesService = ImagesServiceFactory.getImagesService();
+        ServingUrlOptions servingOptions = ServingUrlOptions.Builder.withBlobKey(blobKey);
 
-        try {
-          //  String servingUrl = imagesService.getServingUrl(servingOptions);
+
+            String servingUrl = imagesService.getServingUrl(servingOptions);
 
             res.setStatus(HttpServletResponse.SC_OK);
             res.setContentType("application/json");
@@ -44,14 +44,12 @@ public class BlobUploadServlet extends HttpServlet {
             // send simple json response (ImageUploadResponse is a POJO)
             ImageUploadResponse result = new ImageUploadResponse();
             result.setBlobKey(blobKey.getKeyString());
-            result.setServingUrl("");
+            result.setServingUrl(servingUrl);
 
             PrintWriter out = res.getWriter();
             out.print(new Gson().toJson(result));
             out.flush();
             out.close();
-        } catch(Exception e){
-            e.printStackTrace();
-        }
+
     }
 }

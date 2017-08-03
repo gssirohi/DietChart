@@ -145,4 +145,13 @@ public class CommonUtils {
         int dh = new Double((((double)factor) * ((double)(source.getHeight())))).intValue();
         return Bitmap.createScaledBitmap(source, dw, dh, false);
     }
+
+    public static Long[] getLongArrayFromList(List<Long> values) {
+        Long[] array = new Long[values.size()];
+        int i = 0;
+        for(Long l:values){
+            array[i++] = l;
+        }
+        return array;
+    }
 }

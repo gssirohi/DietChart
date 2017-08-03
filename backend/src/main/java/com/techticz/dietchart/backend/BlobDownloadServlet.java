@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class BlobDownloadServlet extends HttpServlet {
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         BlobstoreService blobService = BlobstoreServiceFactory.getBlobstoreService();
         BlobKey blobKey = new BlobKey(req.getParameter("blob-key"));
         blobService.serve(blobKey, res);

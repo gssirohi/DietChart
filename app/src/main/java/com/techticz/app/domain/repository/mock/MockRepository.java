@@ -13,6 +13,7 @@ import com.techticz.app.executor.BaseInteractor;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class MockRepository implements IAppRepository {
     @Override
-    public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, int[] mealIds) {
+    public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, long[] mealIds) {
         return null;
     }
 
@@ -101,6 +102,16 @@ public class MockRepository implements IAppRepository {
 
     @Override
     public long updateFood(CreateFoodInteractor createFoodInteractor, Food food) {
+        return 0;
+    }
+
+    @Override
+    public Bitmap fetchBlob(BaseInteractor interactor, String blobKey,String servingurl) throws MalformedURLException {
+        return null;
+    }
+
+    @Override
+    public long updateMeal(BaseInteractor interactor, Meal meal) {
         return 0;
     }
 }

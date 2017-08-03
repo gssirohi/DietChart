@@ -164,9 +164,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="more"
+        android:text="Explore"
         android:layout_gravity="end"
         android:textAllCaps="true"
         android:textColor="@color/colorPrimary"
-        android:id="@+id/tv_meal_more" />
+        android:id="@+id/tv_meal_explore" />
     </LinearLayout>

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.techticz.app.constant.AppConstants;
 import com.techticz.app.constant.Routines;
 import com.techticz.app.domain.interactor.CreateFoodInteractor;
@@ -19,10 +21,17 @@ import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.utility.CommonUtils;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
+import com.techticz.dietchart.backend.foodEntityApi.model.FoodEntity;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by gssirohi on 25/8/16.
@@ -97,7 +106,7 @@ public class DataBaseRepository implements IAppRepository {
     }
 
     @Override
-    public List<Meal> getMealList(BaseInteractor interactor, int limit, String searchKey, int[] mealIds) {
+    public List<Meal> getMealList(BaseInteractor interactor, int limit, String searchKey, long[] mealIds) {
         if (!TextUtils.isEmpty(searchKey))
             return db.mealDao().getAllContains("%" + searchKey + "%");
         else if (mealIds.length > 0) {
@@ -201,12 +210,44 @@ public class DataBaseRepository implements IAppRepository {
 
     @Override
     public ImageUploadResponse uploadImage(BaseInteractor interactor, Bitmap bitmap, String imageName) {
+        Map config = new HashMap();
+        config.put("cloud_name", AppConstants.CLOUDINARY_CLOUD_NAME);
+        config.put("api_key", AppConstants.CLOUDINARY_API_KEY);
+        config.put("api_secret", AppConstants.CLOUDINARY_API_SECRET);
+        Cloudinary cloudinary = new Cloudinary(config);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+
+        try {
+            cloudinary.uploader().upload(bs, ObjectUtils.asMap("public_id", imageName));
+            String imageUrl = cloudinary.url().generate(imageName + ".jpg");
+            ImageUploadResponse resp  = new ImageUploadResponse();
+            resp.setBlobKey("");
+            resp.setServingUrl(imageUrl);
+            return resp;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
     public long updateFood(CreateFoodInteractor createFoodInteractor, Food food) {
         return 0;
+    }
+
+    @Override
+    public Bitmap fetchBlob(BaseInteractor interactor, String blobKey,String servingurl) throws MalformedURLException {
+        return null;
+    }
+
+    @Override
+    public long updateMeal(BaseInteractor i, Meal meal) {
+        int row = db.mealDao().update(meal);
+        return meal.getUid();
     }
 
     @Override

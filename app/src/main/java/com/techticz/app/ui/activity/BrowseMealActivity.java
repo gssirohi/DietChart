@@ -24,17 +24,16 @@ import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.Key;
 import com.techticz.app.constant.UseCases;
 import com.techticz.app.domain.interactor.FetchAllMealsUseCase;
-import com.techticz.app.domain.interactor.FetchFoodListUseCase;
+import com.techticz.app.domain.interactor.FetchMealListUseCase;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.ui.adapter.BrowseMealRecyclerViewAdapter;
-import com.techticz.app.ui.viewmodel.contract.IMealViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.View.GONE;
 
-public class BrowseMealActivity extends BaseActivity implements BrowseMealRecyclerViewAdapter.MealViewContract, FetchAllMealsUseCase.Callback {
+public class BrowseMealActivity extends BaseActivity implements BrowseMealRecyclerViewAdapter.MealViewContract, FetchMealListUseCase.Callback {
 
     private EditText searchBox;
     private ImageView ivClear;
@@ -52,7 +51,7 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
     private int routineId;
     private int day;
     private int mealPlanId;
-    private FetchAllMealsUseCase searchMealUseCase;
+    private FetchMealListUseCase searchMealUseCase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,9 +110,9 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
         pb.setVisibility(View.VISIBLE);
         //getPresenter().onFetchAllMeals(currentSearchKey);
         if (searchMealUseCase == null) {
-            searchMealUseCase = (FetchAllMealsUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_ALL_MEALS);
+            searchMealUseCase = (FetchMealListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_LIST);
         }
-        searchMealUseCase.execute(this, false, currentSearchKey, new int[]{});
+        searchMealUseCase.execute(this, false, currentSearchKey, new long[]{});
     }
 
     private void initViewFields() {
@@ -157,7 +156,7 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
     }
 
     private void handleCreateMealClick() {
-        getNavigator().navigateToCreateMealActivity(this, mealPlanId);
+        getNavigator().navigateToCreateMealActivity( this, mealPlanId);
     }
 
     @Override
@@ -195,7 +194,7 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
     }
 
     @Override
-    public void onAllMealsFetched(List<Meal> meals, String searchKey) {
+    public void onMealListFetched(List<Meal> meals, String searchKey) {
         if (currentSearchKey.equalsIgnoreCase(searchKey)) {
             pb.setVisibility(GONE);
             searchData.clear();

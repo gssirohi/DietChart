@@ -5,6 +5,7 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -46,6 +47,10 @@ public class Meal extends Model {
     @SerializedName("foodIds")
     @Expose
     private List<Long> foodIds;
+    @Ignore
+    private Bitmap bitmap;
+    private String blobServingUrl;
+    private String blobKey;
 
     public Long getUid() {
         return uid;
@@ -101,5 +106,29 @@ public class Meal extends Model {
 
     public void setFoodIds(List<Long> foodIds) {
         this.foodIds = foodIds;
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    public void setBlobServingUrl(String blobServingUrl) {
+        this.blobServingUrl = blobServingUrl;
+    }
+
+    public String getBlobServingUrl() {
+        return blobServingUrl;
+    }
+
+    public void setBlobKey(String blobKey) {
+        this.blobKey = blobKey;
+    }
+
+    public String getBlobKey() {
+        return blobKey;
     }
 }

@@ -24,8 +24,8 @@ public enum FoodCategory {
     PIZZA(13, "Pizza"),
     OTHER(14, "Other");
 
-    private final int code;
-    private final String lable;
+    public final int code;
+    public final String lable;
 
     FoodCategory(int i, String lable) {
         this.code = i;
@@ -78,5 +78,13 @@ public enum FoodCategory {
             names.add(type.lable);
         }
         return names;
+    }
+
+    public static FoodCategory getById(int type) {
+        List<FoodCategory> list = getAll();
+        for(FoodCategory cat: list){
+            if(type == cat.code) return cat;
+        }
+        return MILK;
     }
 }

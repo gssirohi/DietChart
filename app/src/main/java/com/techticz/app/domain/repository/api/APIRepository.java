@@ -2,8 +2,12 @@ package com.techticz.app.domain.repository.api;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 import android.util.Base64;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
@@ -34,14 +38,22 @@ import com.techticz.dietchart.backend.foodEntityApi.model.FoodEntity;
 import com.techticz.dietchart.backend.myApi.MyApi;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.google.api.client.http.HttpMethods.POST;
 
 
 /**
@@ -161,7 +173,7 @@ public class APIRepository implements IAppRepository {
     }
 
     @Override
-    public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, int[] mealIds) {
+    public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, long[] mealIds) {
         return null;
     }
 
@@ -298,8 +310,34 @@ public class APIRepository implements IAppRepository {
         }
         return response;*/
 
+//------------------------------------
+
+        Map config = new HashMap();
+        config.put("cloud_name", AppConstants.CLOUDINARY_CLOUD_NAME);
+        config.put("api_key", AppConstants.CLOUDINARY_API_KEY);
+        config.put("api_secret", AppConstants.CLOUDINARY_API_SECRET);
+        Cloudinary cloudinary = new Cloudinary(config);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+
+        try {
+            cloudinary.uploader().upload(bs, ObjectUtils.asMap("public_id", imageName));
+            String imageUrl = cloudinary.url().generate(imageName + ".jpg");
+            ImageUploadResponse resp  = new ImageUploadResponse();
+            resp.setBlobKey("");
+            resp.setServingUrl(imageUrl);
+            return resp;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+//----------------------------------
+
         // Upload via AppEngine Endpoint (ImageUploadRequest is a generated model)
-        ImageUploadRequest image = new ImageUploadRequest();
+        /*ImageUploadRequest image = new ImageUploadRequest();
         image.setImageData(CommonUtils.getByteArrayFromBitmap(bitmap,true).toString());
         image.setImageName(imageName);
         image.setMimeType("image/png");
@@ -309,7 +347,8 @@ public class APIRepository implements IAppRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return response;
+        return response;*/
+
 
     }
 
@@ -322,5 +361,41 @@ public class APIRepository implements IAppRepository {
             e.printStackTrace();
         }
         return 0l;
+    }
+
+    @Override
+    public Bitmap fetchBlob(BaseInteractor interactor, String blobKey,String servingUrl) throws MalformedURLException {
+        URL imageURL;
+        if(!TextUtils.isEmpty(servingUrl)){
+            imageURL = new URL(servingUrl);
+        } else {
+            imageURL = new URL("https://diet-chart-app.appspot.com/blob/serve");
+        }
+
+        HttpURLConnection connection = null;
+
+        try {
+            connection = (HttpURLConnection) imageURL.openConnection();
+            connection.setRequestProperty("blob-key",blobKey);
+            connection.setRequestProperty("serving-url",servingUrl);
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream inputStream = connection.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(inputStream);
+            Bitmap bitmap = BitmapFactory.decodeStream(bis);
+            bis.close();
+            inputStream.close();
+            return bitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+        return null;
+    }
+
+    @Override
+    public long updateMeal(BaseInteractor interactor, Meal meal) {
+        return 0;
     }
 }

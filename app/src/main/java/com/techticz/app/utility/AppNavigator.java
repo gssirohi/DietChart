@@ -3,7 +3,9 @@ package com.techticz.app.utility;
 import android.app.Activity;
 import android.content.Context;
 
+import com.techticz.app.base.BaseActivity;
 import com.techticz.app.constant.Key;
+import com.techticz.app.constant.LaunchMode;
 import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.ui.activity.BrowseFoodActivity;
 import com.techticz.app.ui.activity.BrowseMealActivity;
@@ -60,12 +62,17 @@ public class AppNavigator {
         }
     }
 
-    public void navigateToCreateMealActivity(Activity context, int mealPlanId) {
+    public void navigateToCreateMealActivity(Activity context, long mealPlanId) {
         if (context != null) {
-            context.startActivityForResult(CreateMealActivity.getCallingIntent(context, mealPlanId), Key.CREATE_MEAL);
+            context.startActivityForResult(CreateMealActivity.getCallingIntent(context, mealPlanId,LaunchMode.CREATE), Key.CREATE_MEAL);
         }
     }
 
+    public void navigateToMealDetailsActivity(Activity context, long planId, Long mealId) {
+        if (context != null) {
+            context.startActivityForResult(CreateMealActivity.getCallingIntent(context, planId,mealId, LaunchMode.VIEW), Key.VIEW_MEAL);
+        }
+    }
     public void navigateToBrowseFoodActivity(Activity context, Long mealId) {
         if (context != null) {
             context.startActivityForResult(BrowseFoodActivity.getCallingIntent(context, mealId), Key.BROWSE_FOOD);
@@ -83,5 +90,6 @@ public class AppNavigator {
             context.startActivity(BrowseMealPlanActivity.getCallingIntent(context));
         }
     }
+
 }
 

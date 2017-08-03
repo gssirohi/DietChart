@@ -19,4 +19,5 @@ public class Key {
     public static final int BROWSE_FOOD = 15;
     public static final int CREATE_FOOD = 16;
     public static final int GET_FROM_GALLERY = 17;
+    public static final int VIEW_MEAL = 18;
 }
