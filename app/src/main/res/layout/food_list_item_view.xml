@@ -6,6 +6,12 @@
     android:padding="4dp"
     android:background="@color/meal_item_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <CheckBox
+        android:id="@+id/cb_food"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginRight="4dp"/>
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/civ_food"
         android:layout_width="60dp"
@@ -38,8 +44,8 @@
     <View
         android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
         android:background="@color/divider">
     </View>
     <LinearLayout
@@ -49,20 +55,24 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="16dp"
         >
-        <TextView
-            android:layout_width="wrap_content"
+        <EditText
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:text="280"
+            android:text="1"
             style="@style/Text.Light.VeryLarge.Bold"
             android:layout_gravity="end"
+            android:gravity="center"
+            android:inputType="number"
             android:textColor="@color/highlighted_text_color"
-            android:id="@+id/tv_calories"
+            android:id="@+id/et_serving"
             />
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:text="Calories"
+            android:text="Bowl"
             android:layout_gravity="end"
+            android:gravity="center"
+            android:id="@+id/tv_serving_label"
             style="@style/Text.Light"/>
     </LinearLayout>
 </LinearLayout>

@@ -3,6 +3,7 @@ package com.techticz.app.domain.repository.database;
 import android.arch.persistence.room.TypeConverter;
 import android.text.TextUtils;
 
+import com.techticz.app.domain.model.pojo.AddedFood;
 import com.techticz.app.domain.model.pojo.DayMeals;
 
 import java.util.ArrayList;
@@ -108,4 +109,39 @@ public class Converters {
         return list;
     }
 
+    @TypeConverter
+    public static String addedFoodListToString(List<AddedFood> addedFoods){
+        String str = "";
+        Iterator<AddedFood> it = addedFoods.iterator();
+
+        while (it.hasNext()){
+            AddedFood af = it.next();
+            if(af != null){
+                Long id  = af.getFoodId();
+                int s = af.getServing();
+                String conversion = id+"@"+s;
+                str = str+conversion;
+                if(it.hasNext()){
+                    str = str+":";
+                }
+            }
+        }
+        return str;
+    }
+
+    @TypeConverter
+    public static List<AddedFood> stringToAddedFoodList(String str){
+        List<AddedFood> addedFoods = new ArrayList<>();
+        if(TextUtils.isEmpty(str)) return addedFoods;
+
+        String[] aFoods = str.split(":");
+        for (String aF : aFoods) {
+            String[] s = aF.split("@");
+            Long id = Long.parseLong(s[0]);
+            int serving = Integer.parseInt(s[1]);
+            AddedFood addedFood = new AddedFood(id,serving);
+            addedFoods.add(addedFood);
+        }
+        return addedFoods;
+    }
 }

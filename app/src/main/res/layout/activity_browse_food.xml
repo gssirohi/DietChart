@@ -30,7 +30,7 @@
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:hint="Enter meal name"
+            android:hint="Enter food name"
             android:textColorHint="@color/hint_text_color_light"
             android:drawableRight="@drawable/ic_action_search"
             android:background="@android:color/transparent"
@@ -110,7 +110,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Popular Meals"
+                android:text="Popular Foods"
                 android:layout_margin="10dp"
                 style="@style/Card.Title"/>
             <android.support.v7.widget.RecyclerView

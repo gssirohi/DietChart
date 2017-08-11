@@ -58,7 +58,7 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_browse_meal);
+        setContentView(R.layout.activity_browse_food);
         initViewFields();
         initData();
         initUI();

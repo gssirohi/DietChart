@@ -23,6 +23,12 @@
         <!-- <item name="android:textStyle">bold</item> -->
         <item name="android:background">@drawable/bg_button_primary</item>
     </style>
+    <style name="AppButtonStyleNegative" parent="Text.Light.Large">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textAllCaps">true</item>
+        <!-- <item name="android:textStyle">bold</item> -->
+        <item name="android:background">@drawable/bg_button_negative</item>
+    </style>
 
     <style name="AppButtonStyleAccent" parent="Text.Light.Medium">
         <item name="android:textColor">@android:color/white</item>

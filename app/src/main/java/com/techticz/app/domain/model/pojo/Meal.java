@@ -44,6 +44,10 @@ public class Meal extends Model {
     @Expose
     private List<Integer> prefRoutine;
 
+    @SerializedName("addedFoods")
+    @Expose
+    private List<AddedFood> addedFoods;
+
     @SerializedName("foodIds")
     @Expose
     private List<Long> foodIds;
@@ -130,5 +134,13 @@ public class Meal extends Model {
 
     public String getBlobKey() {
         return blobKey;
+    }
+
+    public List<AddedFood> getAddedFoods() {
+        return addedFoods;
+    }
+
+    public void setAddedFoods(List<AddedFood> addedFoods) {
+        this.addedFoods = addedFoods;
     }
 }

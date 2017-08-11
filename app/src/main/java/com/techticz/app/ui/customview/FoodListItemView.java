@@ -3,7 +3,11 @@ package com.techticz.app.ui.customview;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -11,6 +15,7 @@ import com.techticz.app.R;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.FoodType;
+import com.techticz.app.constant.Servings;
 import com.techticz.app.constant.UseCases;
 import com.techticz.app.domain.interactor.FetchBlobUseCase;
 import com.techticz.app.domain.interactor.FetchImageInteractor;
@@ -28,56 +33,85 @@ public class FoodListItemView extends FrameLayout implements FetchBlobUseCase.Ca
     private Food viewModel;
     private FetchImageInteractor interactor;
     private CircleImageView civ;
+    private CheckBox cb_food;
+    private boolean isSelected;
+    private SelectionListner foodSelectListner;
+    private EditText et_serving;
+    private TextView tv_serving_label;
 
     public FoodListItemView(Context context) {
         super(context);
         LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT);
         setLayoutParams(params);
+        if(context instanceof SelectionListner){
+            setFoodSelectListner((SelectionListner)context);
+        }
         init();
-
     }
 
 
+    public void displayCheckBox(boolean display){
+        if(display)cb_food.setVisibility(VISIBLE);
+        else
+        cb_food.setVisibility(GONE);
+
+        if(!display){
+            isSelected = false;
+        }
+        cb_food.setChecked(isSelected);
+    }
+    public void selectFood(boolean select){
+        isSelected = select;
+        cb_food.setChecked(select);
+    }
     private void init() {
         ViewGroup itemView =
                 (ViewGroup) LayoutInflater.from(getContext())
                         .inflate(R.layout.food_list_item_view, null, false);
         addView(itemView);
+        civ = (CircleImageView)findViewById(R.id.civ_food);
+        cb_food = (CheckBox)findViewById(R.id.cb_food);
+        et_serving = (EditText)findViewById(R.id.et_serving);
+        tv_serving_label = (TextView)findViewById(R.id.tv_serving_label);
+        et_serving.setEnabled(false);
     }
 
-    public void fillDetails(Food viewModel) {
+    public void setFoodSelectListner(SelectionListner foodSelectListner) {
+        this.foodSelectListner = foodSelectListner;
+    }
+
+    public void fillDetails(final Food viewModel){
+        fillDetails(viewModel,-1);
+    }
+    public void fillDetails(final Food viewModel,int serving) {
         this.viewModel = viewModel;
         TextView name = (TextView) findViewById(R.id.tv_food_name);
         TextView type = (TextView) findViewById(R.id.tv_food_type);
-        civ = (CircleImageView)findViewById(R.id.civ_food);
-
+        cb_food.setVisibility(View.GONE);
+        final Food food = viewModel;
+        cb_food.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                isSelected = b;
+                if(foodSelectListner != null) {
+                    foodSelectListner.onFoodSelectionChanged(food.getUid(),b);
+                }
+            }
+        });
 //
         name.setText(viewModel.getName());
         type.setText(FoodType.getById(viewModel.getType()).lable);
 
+        if(serving != -1) {
+            tv_serving_label.setText(Servings.getById(viewModel.getServingId()).lable);
+            et_serving.setText(""+serving);
+        }/* else {
+            tv_serving_label.setText("Calories");
+            et_serving.setText(""+viewModel.getCalory());
+        }*/
         setFoodImage(civ);
 
-/*
-        String url = viewModel.getImageUrl();
-        imageView.setVisibility(View.GONE);
-        progress.setVisibility(View.VISIBLE);
-        if (interactor != null)
-            interactor.setCancelled(true);//discard previous results since you have new  imageUyrl
-        interactor = (FetchImageInteractor) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.FETCH_PRODUCT_IMAGE);
-        interactor.execute(new LoadImageUseCase.Callback() {
-            @Override
-            public void onError(AppErrors error) {
-
-            }
-
-            @Override
-            public void onImage(Bitmap image) {
-                imageView.setImageBitmap(image);
-                imageView.setVisibility(View.VISIBLE);
-                progress.setVisibility(View.GONE);
-            }
-        }, url, false);*/
     }
 
     private void setFoodImage(CircleImageView civ) {
@@ -97,5 +131,22 @@ public class FoodListItemView extends FrameLayout implements FetchBlobUseCase.Ca
     @Override
     public void onBlobFetched(String blobKey, Bitmap bitmap) {
         civ.setImageBitmap(bitmap);
+    }
+
+    public boolean isFoodSelected() {
+        return isSelected;
+    }
+
+    public int getServing() {
+        EditText et = (EditText) findViewById(R.id.et_serving);
+        return Integer.parseInt(et.getText().toString());
+    }
+
+    public void servingEdit(boolean b) {
+        et_serving.setEnabled(b);
+    }
+
+    public interface SelectionListner{
+        public void onFoodSelectionChanged(long id,boolean b);
     }
 }

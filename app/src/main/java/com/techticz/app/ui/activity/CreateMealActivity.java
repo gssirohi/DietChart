@@ -31,6 +31,7 @@ import com.techticz.app.domain.interactor.CreateMealUseCase;
 import com.techticz.app.domain.interactor.FetchBlobUseCase;
 import com.techticz.app.domain.interactor.FetchFoodListUseCase;
 import com.techticz.app.domain.interactor.FetchMealListUseCase;
+import com.techticz.app.domain.model.pojo.AddedFood;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.ui.customview.FoodListItemView;
@@ -41,12 +42,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.View.GONE;
 import static com.techticz.app.constant.Key.GET_FROM_GALLERY;
 import static com.techticz.app.constant.LaunchMode.CREATE;
 import static com.techticz.app.constant.LaunchMode.EDIT;
 import static com.techticz.app.constant.LaunchMode.VIEW;
 
-public class CreateMealActivity extends BaseActivity implements FetchFoodListUseCase.Callback, CreateMealUseCase.Callback, FetchMealListUseCase.Callback, FetchBlobUseCase.Callback {
+public class CreateMealActivity extends BaseActivity implements FetchFoodListUseCase.Callback, CreateMealUseCase.Callback
+        , FetchMealListUseCase.Callback, FetchBlobUseCase.Callback
+         ,FoodListItemView.SelectionListner{
 
     private TextInputLayout til_meal_name;
     private TextInputLayout til_meal_desc;
@@ -66,6 +70,8 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
     private Bitmap mealBitmap;
     private FloatingActionButton fab_meal;
     private LaunchMode mode;
+    private boolean imageUploadRequired;
+    private Button b_remove_food;
 
 
     @Override
@@ -109,6 +115,7 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         til_meal_type = (TextInputLayout) findViewById(R.id.til_meal_type);
         til_meal_pref_routine = (TextInputLayout) findViewById(R.id.til_meal_pref_routines);
         b_add_food = (Button) findViewById(R.id.b_meal_add_food);
+        b_remove_food = (Button) findViewById(R.id.b_meal_remove_food);
         ll_food_container = (LinearLayout) findViewById(R.id.ll_food_item);
         ll_nutri_container = (LinearLayout) findViewById(R.id.ll_nutritient_view_container);
         iv_meal = (ImageView)findViewById(R.id.iv_meal);
@@ -119,6 +126,12 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
             }
         });
 
+        b_remove_food.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleRemoveFoodClick();
+            }
+        });
         b_add_food.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -148,10 +161,30 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         changeMode(mode);
     }
 
+    private void handleRemoveFoodClick() {
+        int children = ll_food_container.getChildCount();
+        List<Food> foods = new ArrayList<>();
+        for (int i = 0; i < children; i++) {
+            FoodListItemView view = (FoodListItemView) ll_food_container.getChildAt(i);
+            if(!view.isFoodSelected()){
+                Food food = view.getViewModel();
+                foods.add(food);
+            }
+        }
+
+        ll_food_container.removeAllViews();
+        for(int i = 0; i<foods.size();i++){
+            FoodListItemView view = new FoodListItemView(this);
+            view.fillDetails(foods.get(i));
+            ll_food_container.addView(view);
+        }
+        updateRemoveButtonVisibility();
+    }
+
     private void changeMode(LaunchMode mode) {
         this.mode = mode;
         if(mode == VIEW){
-            fab_meal.setImageResource(R.drawable.ic_arrow_forward);
+            fab_meal.setImageResource(R.drawable.ic_mode_edit);
             updateEditability(false);
         } else if(mode == EDIT){
             fab_meal.setImageResource(R.drawable.ic_check);
@@ -174,9 +207,21 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         til_meal_type.getEditText().setEnabled(isEditable);
         til_meal_category.getEditText().setEnabled(isEditable);
         til_meal_pref_routine.getEditText().setEnabled(isEditable);
-        b_add_food.setEnabled(isEditable);
-        b_add_food.setClickable(isEditable);
+        b_add_food.setVisibility(isEditable?View.VISIBLE:GONE);
         iv_meal.setClickable(isEditable);
+        int children = ll_food_container.getChildCount();
+        List<Long> foods = new ArrayList<>();
+        for (int i = 0; i < children; i++) {
+            FoodListItemView view = (FoodListItemView) ll_food_container.getChildAt(i);
+            if(isEditable){
+                view.displayCheckBox(true);
+                view.servingEdit(true);
+            }
+            Food food = view.getViewModel();
+            long uid = food.getUid();
+            foods.add(uid);
+        }
+        updateRemoveButtonVisibility();
     }
 
 
@@ -257,11 +302,11 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
             return;
         }
 
-        Meal meal = new Meal();
-        meal.setName(til_meal_name.getEditText().getText().toString());
-        meal.setDesc(til_meal_desc.getEditText().getText().toString());
-        meal.setType(FoodType.getIdByName(til_meal_type.getEditText().getText().toString()));
-        meal.setCategory(FoodCategory.getIdByName(til_meal_category.getEditText().getText().toString()));
+
+        getMeal().setName(til_meal_name.getEditText().getText().toString());
+        getMeal().setDesc(til_meal_desc.getEditText().getText().toString());
+        getMeal().setType(FoodType.getIdByName(til_meal_type.getEditText().getText().toString()));
+        getMeal().setCategory(FoodCategory.getIdByName(til_meal_category.getEditText().getText().toString()));
         String prefRoutines = til_meal_pref_routine.getEditText().getText().toString();
         String[] routines = prefRoutines.split(",");
         List<Integer> pRoutines = new ArrayList<>();
@@ -269,20 +314,28 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
             int id = Routines.getIdByName(routine);
             pRoutines.add(id);
         }
-        meal.setPrefRoutine(pRoutines);
+        getMeal().setPrefRoutine(pRoutines);
 
         int children = ll_food_container.getChildCount();
         List<Long> foods = new ArrayList<>();
+        List<AddedFood> aFoods = new ArrayList<>();
         for (int i = 0; i < children; i++) {
             FoodListItemView view = (FoodListItemView) ll_food_container.getChildAt(i);
             Food food = view.getViewModel();
             long uid = food.getUid();
+            int serving  = view.getServing();
             foods.add(uid);
+            aFoods.add(new AddedFood(uid,serving));
         }
-        meal.setFoodIds(foods);
-        meal.setBitmap(mealBitmap);
+        getMeal().setFoodIds(foods);
+        getMeal().setAddedFoods(aFoods);
+        getMeal().setBitmap(mealBitmap);
+        if(imageUploadRequired){
+            getMeal().setBlobServingUrl("");
+            getMeal().setBlobKey("");
+        }
         CreateMealUseCase usecase = (CreateMealUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_AND_ADD_MEAL);
-        usecase.execute(this, meal, true);
+        usecase.execute(this, getMeal(), true);
     }
 
     private boolean isvalidated() {
@@ -332,6 +385,7 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
                 iv_meal.setImageBitmap(bitmap);
                 mealBitmap = bitmap;
+                imageUploadRequired = true;
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -370,23 +424,28 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
 
     @Override
     public void onMealListFetched(List<Meal> meals, String searchKey) {
-        this.meal = meals.get(0);
+        setMeal(meals.get(0));
         loadUIwithMeal();
     }
 
     private void loadUIwithMeal() {
-        til_meal_name.getEditText().setText(meal.getName());
-        til_meal_desc.getEditText().setText(meal.getDesc());
-        til_meal_type.getEditText().setText(FoodType.getById(meal.getType()).lable);
-        til_meal_category.getEditText().setText(FoodCategory.getById(meal.getType()).lable);
-        setPrefRoutinesFromCode(til_meal_pref_routine,meal.getPrefRoutine());
-        fetchFoodWithIds(CommonUtils.getLongArrayFromList(meal.getFoodIds()));
+        til_meal_name.getEditText().setText(getMeal().getName());
+        til_meal_desc.getEditText().setText(getMeal().getDesc());
+        til_meal_type.getEditText().setText(FoodType.getById(getMeal().getType()).lable);
+        til_meal_category.getEditText().setText(FoodCategory.getById(getMeal().getType()).lable);
+        setPrefRoutinesFromCode(til_meal_pref_routine,getMeal().getPrefRoutine());
+        clearFoodViews();
+        fetchFoodWithIds(CommonUtils.getLongArrayFromList(getMeal().getFoodIds()));
         loadMealImage();
+    }
+
+    private void clearFoodViews() {
+        ll_food_container.removeAllViews();
     }
 
     private void loadMealImage() {
         FetchBlobUseCase usecase = (FetchBlobUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_BLOB);
-        usecase.execute(this,false,meal.getBlobKey(),meal.getBlobServingUrl());
+        usecase.execute(this,false,getMeal().getBlobKey(),getMeal().getBlobServingUrl());
     }
 
 
@@ -417,17 +476,37 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
             i.putExtra("day", day);
             setResult(RESULT_OK, i);
             finish();
+        } else if (meal != null && mode == EDIT) {
+            changeMode(LaunchMode.VIEW);
+            setMeal(meal);
+            loadUIwithMeal();
         }
     }
 
     @Override
     public void onFoodListFetched(List<Food> foods, String searchKey) {
-        //basically just one food fetched
         for(Food f: foods) {
             FoodListItemView view = new FoodListItemView(this);
-            view.fillDetails(f);
+            view.fillDetails(f,getServingForFood(f.getUid()));
+            if(mode == EDIT || mode == CREATE){
+                view.displayCheckBox(true);
+                view.servingEdit(true);
+            }
             ll_food_container.addView(view);
         }
+        updateRemoveButtonVisibility();
+    }
+
+    private int getServingForFood(Long uid) {
+        if(getMeal() == null) return 1;
+        if(getMeal().getAddedFoods() == null) return 1;
+
+        for(AddedFood ad: getMeal().getAddedFoods()){
+            if(ad.getFoodId().longValue() == uid.longValue()){
+                return ad.getServing();
+            }
+        }
+        return 1;
     }
 
     public static Intent getCallingIntent(Activity context, long planId, long mealId,LaunchMode mode) {
@@ -436,5 +515,38 @@ public class CreateMealActivity extends BaseActivity implements FetchFoodListUse
         i.putExtra("mealId", mealId);
         i.putExtra("mode", mode.code);
         return i;
+    }
+
+    @Override
+    public void onFoodSelectionChanged(long id,boolean b) {
+        if(b){
+            b_remove_food.setVisibility(View.VISIBLE);
+        } else {
+            updateRemoveButtonVisibility();
+        }
+    }
+
+    private void updateRemoveButtonVisibility() {
+        int children = ll_food_container.getChildCount();
+        List<Long> foods = new ArrayList<>();
+        for (int i = 0; i < children; i++) {
+            FoodListItemView view = (FoodListItemView) ll_food_container.getChildAt(i);
+            if(view.isFoodSelected()) {
+                b_remove_food.setVisibility(View.VISIBLE);
+                return;
+            }
+        }
+        b_remove_food.setVisibility(GONE);
+    }
+
+    public void setMeal(Meal meal) {
+        this.meal = meal;
+    }
+
+    public Meal getMeal() {
+        if(meal == null){
+            meal = new Meal();
+        }
+        return meal;
     }
 }

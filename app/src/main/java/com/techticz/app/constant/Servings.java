@@ -66,13 +66,13 @@ public enum Servings {
     public static Servings getById(int type) {
         if (type == STANDARD_SERVING.code) return STANDARD_SERVING;
         if (type == PIECE.code) return PIECE;
-        if (type == CUP.code) return PIECE;
-        if (type == GLASS.code) return PIECE;
-        if (type == CANE.code) return PIECE;
-        if (type == BOWL.code) return PIECE;
-        if (type == TBL_SPN.code) return PIECE;
-        if (type == SLICE.code) return PIECE;
-        if (type == BOTTLE.code) return PIECE;
+        if (type == CUP.code) return CUP;
+        if (type == GLASS.code) return GLASS;
+        if (type == CANE.code) return CANE;
+        if (type == BOWL.code) return BOWL;
+        if (type == TBL_SPN.code) return TBL_SPN;
+        if (type == SLICE.code) return SLICE;
+        if (type == BOTTLE.code) return BOTTLE;
 
         return STANDARD_SERVING;
     }
