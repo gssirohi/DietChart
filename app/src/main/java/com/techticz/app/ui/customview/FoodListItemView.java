@@ -22,17 +22,15 @@ import com.techticz.app.domain.interactor.FetchImageInteractor;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.ui.viewmodel.contract.IMealViewModel;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 
 /**
  * TODO: document your custom view class.
  */
 
-public class FoodListItemView extends FrameLayout implements FetchBlobUseCase.Callback {
+public class FoodListItemView extends FrameLayout {
     private Food viewModel;
     private FetchImageInteractor interactor;
-    private CircleImageView civ;
+    private RoundImageView civ;
     private CheckBox cb_food;
     private boolean isSelected;
     private SelectionListner foodSelectListner;
@@ -70,7 +68,7 @@ public class FoodListItemView extends FrameLayout implements FetchBlobUseCase.Ca
                 (ViewGroup) LayoutInflater.from(getContext())
                         .inflate(R.layout.food_list_item_view, null, false);
         addView(itemView);
-        civ = (CircleImageView)findViewById(R.id.civ_food);
+        civ = (RoundImageView)findViewById(R.id.civ_food);
         cb_food = (CheckBox)findViewById(R.id.cb_food);
         et_serving = (EditText)findViewById(R.id.et_serving);
         tv_serving_label = (TextView)findViewById(R.id.tv_serving_label);
@@ -103,8 +101,8 @@ public class FoodListItemView extends FrameLayout implements FetchBlobUseCase.Ca
         name.setText(viewModel.getName());
         type.setText(FoodType.getById(viewModel.getType()).lable);
 
+        tv_serving_label.setText(Servings.getById(viewModel.getServingId()).lable);
         if(serving != -1) {
-            tv_serving_label.setText(Servings.getById(viewModel.getServingId()).lable);
             et_serving.setText(""+serving);
         }/* else {
             tv_serving_label.setText("Calories");
@@ -114,23 +112,12 @@ public class FoodListItemView extends FrameLayout implements FetchBlobUseCase.Ca
 
     }
 
-    private void setFoodImage(CircleImageView civ) {
-        FetchBlobUseCase usecase = (FetchBlobUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.FETCH_BLOB);
-        usecase.execute(this,false,viewModel.getBlobKey(),viewModel.getBlobServingUrl());
+    private void setFoodImage(RoundImageView civ) {
+        civ.setUrl(viewModel.getBlobServingUrl());
     }
 
     public Food getViewModel() {
         return viewModel;
-    }
-
-    @Override
-    public void onError(AppErrors error) {
-
-    }
-
-    @Override
-    public void onBlobFetched(String blobKey, Bitmap bitmap) {
-        civ.setImageBitmap(bitmap);
     }
 
     public boolean isFoodSelected() {

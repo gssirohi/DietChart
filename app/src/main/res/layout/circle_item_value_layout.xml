@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:background="@drawable/shape_circle"
+    android:padding="10dp"
+    android:gravity="center">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:id="@+id/ll"
+        android:layout_gravity="center"
+        android:padding="3dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:text=""
+            android:hint="label"
+            android:id="@+id/tv_circle_item_name"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:textAlignment="gravity"
+            android:gravity="center_vertical|center_horizontal"
+            style="@style/Text.Dark"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/textView3"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorAccentLight"
+             />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:hint="valve"
+            android:id="@+id/tv_circle_item_value"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            style="@style/Text.Dark.Large"
+            android:gravity="center_vertical|center_horizontal" />
+    </LinearLayout>
+
+</FrameLayout>

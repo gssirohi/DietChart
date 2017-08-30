@@ -30,11 +30,17 @@ import com.techticz.app.network.ResponseContainer;
 import com.techticz.app.network.ServiceRequest;
 import com.techticz.app.utility.CommonUtils;
 import com.techticz.dietchart.backend.blobApi.BlobApi;
-import com.techticz.dietchart.backend.blobApi.model.ImageUploadRequest;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
+import com.techticz.dietchart.backend.entities.mealPlanEntityApi.model.CollectionResponseMealPlanEntityItem;
+import com.techticz.dietchart.backend.entities.mealPlanEntityApi.model.MealPlanEntityItem;
+import com.techticz.dietchart.backend.entities.mealPlanEntityApi.MealPlanEntityApi;
 import com.techticz.dietchart.backend.foodEntityApi.FoodEntityApi;
 import com.techticz.dietchart.backend.foodEntityApi.model.CollectionResponseFoodEntity;
 import com.techticz.dietchart.backend.foodEntityApi.model.FoodEntity;
+import com.techticz.dietchart.backend.mealEntityApi.MealEntityApi;
+import com.techticz.dietchart.backend.mealEntityApi.model.CollectionResponseMealEntity;
+import com.techticz.dietchart.backend.mealEntityApi.model.MealEntity;
+
 import com.techticz.dietchart.backend.myApi.MyApi;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
@@ -52,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.api.client.http.HttpMethods.POST;
 
@@ -63,6 +70,8 @@ public class APIRepository implements IAppRepository {
     private final APIResponseMapper responseMapper;
     private final FoodEntityApi foodAPI;
     private final BlobApi blobApi;
+    private final MealEntityApi mealAPI;
+    private final MealPlanEntityApi mealPlanAPI;
     private AppRestClient restClient;
     private MyApi myApiService;
 
@@ -84,6 +93,32 @@ public class APIRepository implements IAppRepository {
 
         myApiService = builder.build();
 
+        MealPlanEntityApi.Builder mealPlanBuilder = new MealPlanEntityApi.Builder(AndroidHttp.newCompatibleTransport(),
+                new AndroidJsonFactory(), null)
+                // options for running against local devappserver
+                // - 10.0.2.2 is localhost's IP address in Android emulator
+                // - turn off compression when running against local devappserver
+                .setRootUrl("https://diet-chart-app.appspot.com/_ah/api/")
+                .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                    @Override
+                    public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                        abstractGoogleClientRequest.setDisableGZipContent(true);
+                    }
+                });
+        mealPlanAPI = mealPlanBuilder.build();
+        MealEntityApi.Builder mealBuilder = new MealEntityApi.Builder(AndroidHttp.newCompatibleTransport(),
+                new AndroidJsonFactory(), null)
+                // options for running against local devappserver
+                // - 10.0.2.2 is localhost's IP address in Android emulator
+                // - turn off compression when running against local devappserver
+                .setRootUrl("https://diet-chart-app.appspot.com/_ah/api/")
+                .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                    @Override
+                    public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                        abstractGoogleClientRequest.setDisableGZipContent(true);
+                    }
+                });
+        mealAPI = mealBuilder.build();
         FoodEntityApi.Builder foodBuilder = new FoodEntityApi.Builder(AndroidHttp.newCompatibleTransport(),
                 new AndroidJsonFactory(), null)
                 // options for running against local devappserver
@@ -174,12 +209,39 @@ public class APIRepository implements IAppRepository {
 
     @Override
     public List<Meal> getMealList(BaseInteractor interactor, int dayIndex, String searchKey, long[] mealIds) {
-        return null;
+        List<Meal> meals = new ArrayList<>();
+        try {
+            CollectionResponseMealEntity entities;
+            if(mealIds != null && mealIds.length>0) {
+                List<Long> l;
+                l = CommonUtils.getLongList(mealIds);
+                entities = mealAPI.mealListForIds(l).execute();
+            } else {
+                entities = mealAPI.mealListWhereNameContains(searchKey).execute();
+            }
+            List<MealEntity> list = entities.getItems();
+            meals = responseMapper.getMealsFromEntity(list);
+            return meals;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return meals;
     }
 
     @Override
     public Meal getMealById(BaseInteractor interactor, Long id) {
-        return null;
+        Meal meal = null;
+        try {
+            MealEntity e = mealAPI.get(id).execute();
+            List<MealEntity> list = new ArrayList<>();
+            list.add(e);
+            List<Meal> l = responseMapper.getMealsFromEntity(list);
+            meal  = l.get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return meal;
     }
 
     @Override
@@ -193,8 +255,14 @@ public class APIRepository implements IAppRepository {
     }
 
     @Override
-    public int createMeal(BaseInteractor interactor, Meal meal) {
-        return 0;
+    public long createMeal(BaseInteractor interactor, Meal meal) {
+        try {
+            MealEntity r = mealAPI.insert(responseMapper.getEntityFromMeal(meal)).execute();
+            return r.getUid();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0l;
     }
 
     @Override
@@ -204,22 +272,50 @@ public class APIRepository implements IAppRepository {
 
     @Override
     public long createMealPlan(BaseInteractor interactor, MealPlan plan) {
-        return 0;
+        try {
+            MealPlanEntityItem e = mealPlanAPI.insert(responseMapper.getEntitiyFromMealPlan(plan)).execute();
+            return e.getUid();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return plan.getUid();
     }
 
     @Override
     public int updateMealPlan(BaseInteractor interactor, MealPlan plan) {
+        try {
+            MealPlanEntityItem p = mealPlanAPI.update(plan.getUid(), responseMapper.getEntitiyFromMealPlan(plan)).execute();
+            return 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
     @Override
     public MealPlan getMealPlan(BaseInteractor interactor, Long id) {
+        try {
+            MealPlanEntityItem e = mealPlanAPI.get(id).execute();
+            return responseMapper.getMealPlanFromEntity(e);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
     public List<Meal> getDayMealList(BaseInteractor interactor, int day, DayMeals dayMeals) {
-        return null;
+        List<Meal> list = new ArrayList<>();
+        long[] ids = dayMeals.getAllIds();
+        for(long id: ids){
+            Meal meal = null;
+            if(id != 0)
+            meal = getMealById(interactor,id);
+            else
+                meal = null;
+            list.add(meal);
+        }
+        return list;
     }
 
     @Override
@@ -257,6 +353,19 @@ public class APIRepository implements IAppRepository {
 
     @Override
     public List<MealPlan> getMealPlans(BaseInteractor interactor, String searchKey, boolean isMyPlan) {
+        try {
+            CollectionResponseMealPlanEntityItem resp = mealPlanAPI.list().execute();
+            List<MealPlanEntityItem> list = resp.getItems();
+            List<MealPlan> plans = new ArrayList<>();
+            if(list != null) {
+                for(MealPlanEntityItem e: list){
+                    plans.add(responseMapper.getMealPlanFromEntity(e));
+                }
+            }
+            return plans;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -396,6 +505,16 @@ public class APIRepository implements IAppRepository {
 
     @Override
     public long updateMeal(BaseInteractor interactor, Meal meal) {
-        return 0;
+        try {
+            mealAPI.update(meal.getUid(),responseMapper.getEntityFromMeal(meal)).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return meal.getUid();
+    }
+
+    @Override
+    public Meal getMealDetails(BaseInteractor interactor, long mealId) {
+        return getMealById(interactor,mealId);
     }
 }

@@ -15,119 +15,18 @@
         tools:context="com.techticz.app.ui.activity.BrowseMealActivity"
         android:orientation="vertical">
 
-        <android.support.v7.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="5dp"
-            card_view:cardBackgroundColor="@color/card_backgroud_primary"
-            card_view:cardCornerRadius="5dp"
-            card_view:cardElevation="4dp"
-            card_view:cardUseCompatPadding="true"
-            >
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:hint="Enter meal name"
-                    android:textColorHint="@color/hint_text_color_light"
-                    android:drawableRight="@drawable/ic_action_search"
-                    android:background="@android:color/transparent"
-                    android:id="@+id/et_search_box"
-                    android:layout_weight="1"
-                    />
-                <ProgressBar
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center"
-                    android:id="@+id/pb"/>
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@android:color/white"
-                    android:layout_margin="5dp"/>
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:id="@+id/iv_clear_text"
-                    android:src="@drawable/ic_clear"/>
-            </LinearLayout>
-        </android.support.v7.widget.CardView>
-
-        <android.support.v7.widget.CardView
-            android:id="@+id/card_search_result"
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:text="Recommended Meal Plans"
+            style="@style/Text.Dark.Large"
+            android:layout_margin="16dp"/>
+        <com.yarolegovich.discretescrollview.DiscreteScrollView
+            android:id="@+id/scroller"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            card_view:cardBackgroundColor="@color/card_backgroud_primary"
-            card_view:cardCornerRadius="5dp"
-            card_view:cardElevation="4dp"
-            card_view:cardUseCompatPadding="true"
-            >
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:text="Search Results"
-                    style="@style/Card.Title"/>
-                <android.support.v7.widget.RecyclerView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:padding="16dp"
-                    android:background="@color/card_content_background"
-                    android:id="@+id/recycler_view_search"
-                    >
+            android:layout_height="wrap_content">
 
-                </android.support.v7.widget.RecyclerView>
-            </LinearLayout>
-        </android.support.v7.widget.CardView>
+        </com.yarolegovich.discretescrollview.DiscreteScrollView>
 
-
-        <android.support.v7.widget.CardView
-            xmlns:card_view="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/card_popular_meals"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            card_view:cardBackgroundColor="@color/card_backgroud_primary"
-            card_view:cardCornerRadius="5dp"
-            card_view:cardElevation="4dp"
-            card_view:cardUseCompatPadding="true"
-            >
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="My Diet Plans"
-                    android:layout_margin="10dp"
-                    style="@style/Card.Title"/>
-                <android.support.v7.widget.RecyclerView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:padding="16dp"
-                    android:background="@color/card_content_background"
-                    android:id="@+id/recycler_view_popular"
-                    >
-
-                </android.support.v7.widget.RecyclerView>
-            </LinearLayout>
-        </android.support.v7.widget.CardView>
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

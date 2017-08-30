@@ -13,6 +13,9 @@ import com.google.gson.annotations.SerializedName;
 import com.techticz.app.domain.model.Model;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
 
+import org.parceler.Parcel;
+import org.parceler.ParcelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,138 +25,141 @@ import static com.techticz.app.domain.model.pojo.Food.TableName;
 /**
  * Created by gssirohi on 9/7/17.
  */
-
+@Parcel
 @Entity(tableName = TableName)
 public class Food extends Model {
+    public Food() {
+    }
+
     public final static String TableName = "foods";
 
     @SerializedName("uid")
     @Expose
     @PrimaryKey(autoGenerate = true)
-    private Long uid;
+     Long uid;
 
     @SerializedName("name")
     @Expose
-    private String name;
+     String name;
 
     @SerializedName("desc")
     @Expose
-    private String desc;
+     String desc;
 
     @SerializedName("category")
     @Expose
-    private int category;
+     int category;
 
 
     @SerializedName("type")
     @Expose
-    private int type;
+     int type;
 
     @SerializedName("servingId")
     @Expose
-    private int servingId;
+     int servingId;
 
     @SerializedName("unitId")
     @Expose
-    private int unitId;
+     int unitId;
 
     @SerializedName("contentPerServing")
     @Expose
-    private int contentPerServing;
+     int contentPerServing;
 
 
     @SerializedName("calory")
     @Expose
-    private float calory;
+     float calory;
 
     @SerializedName("carbs")
     @Expose
-    private float carbs;
+     float carbs;
 
     @SerializedName("fat")
     @Expose
-    private float fat;
+     float fat;
 
     @SerializedName("fiber")
     @Expose
-    private float fiber;
+     float fiber;
 
     @SerializedName("protine")
     @Expose
-    private float protine;
+     float protine;
 
     @SerializedName("vitaminA")
     @Expose
-    private float vitaminA;
+     float vitaminA;
 
     @SerializedName("vitaminB")
     @Expose
-    private float vitaminB;
+     float vitaminB;
 
     @SerializedName("vitaminC")
     @Expose
-    private float vitaminC;
+     float vitaminC;
 
     @SerializedName("vitamind")
     @Expose
-    private float vitaminD;
+     float vitaminD;
 
     @SerializedName("vitaminE")
     @Expose
-    private float vitaminE;
+     float vitaminE;
 
     @SerializedName("vitaminK")
     @Expose
-    private float vitaminK;
+     float vitaminK;
 
     @SerializedName("potassium")
     @Expose
-    private float potassium;
+     float potassium;
 
     @SerializedName("calcium")
     @Expose
-    private float calcium;
+     float calcium;
 
     @SerializedName("sodium")
     @Expose
-    private float sodium;
+     float sodium;
 
     @SerializedName("iron")
     @Expose
-    private float iron;
+     float iron;
 
     @SerializedName("magnissium")
     @Expose
-    private float magnissium;
+     float magnissium;
 
     @SerializedName("zinc")
     @Expose
-    private float zinc;
+     float zinc;
 
     @SerializedName("cholestrol")
     @Expose
-    private float cholestrol;
+     float cholestrol;
 
     @SerializedName("sugar")
     @Expose
-    private float sugar;
+     float sugar;
 
 
     @SerializedName("eatable")
     @Expose
-    private boolean eatable;
+     boolean eatable;
 
     @SerializedName("richIn")
     @Expose
-    private List<Integer> richIn = new ArrayList<>();
+     List<Integer> richIn = new ArrayList<>();
 
     @SerializedName("prefRoutine")
     @Expose
-    private List<Integer> prefRoutine;
+     List<Integer> prefRoutine;
     @Ignore
-    private Bitmap bitmap;
-    private String blobServingUrl;
-    private String blobKey;
+     Bitmap bitmap;
+     String blobServingUrl;
+     String blobKey;
 
     public static String getTableName() {
         return TableName;
@@ -422,5 +428,33 @@ public class Food extends Model {
 
     public String getBlobKey() {
         return blobKey;
+    }
+
+    public NutitionInfo extractNutritions() {
+        NutitionInfo nf = new NutitionInfo();
+        nf.setCalory(calory);
+        nf.setCarbs(carbs);
+        nf.setFat(fat);
+        nf.setProtine(protine);
+        nf.setFiber(fiber);
+
+        nf.setVitaminA(vitaminA);
+        nf.setVitaminB(vitaminB);
+        nf.setVitaminC(vitaminC);
+        nf.setVitaminD(vitaminD);
+        nf.setVitaminE(vitaminE);
+        nf.setVitaminK(vitaminK);
+
+        nf.setCalcium(calcium);
+        nf.setSodium(sodium);
+        nf.setPotassium(potassium);
+        nf.setMagnissium(magnissium);
+        nf.setZinc(zinc);
+        nf.setIron(iron);
+
+        nf.setSugar(sugar);
+        nf.setCholestrol(cholestrol);
+
+        return nf;
     }
 }

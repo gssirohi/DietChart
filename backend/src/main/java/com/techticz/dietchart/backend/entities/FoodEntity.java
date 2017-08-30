@@ -1,4 +1,4 @@
-package com.techticz.dietchart.backend;
+package com.techticz.dietchart.backend.entities;
 
 import com.google.appengine.repackaged.com.google.gson.annotations.Expose;
 import com.google.appengine.repackaged.com.google.gson.annotations.SerializedName;

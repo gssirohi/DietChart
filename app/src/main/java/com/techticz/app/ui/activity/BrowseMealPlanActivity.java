@@ -31,13 +31,19 @@ import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.ui.adapter.BrowseFoodRecyclerViewAdapter;
 import com.techticz.app.ui.adapter.BrowsePlanRecyclerViewAdapter;
+import com.techticz.app.ui.adapter.MealPlanPagerAdapter;
+import com.yarolegovich.discretescrollview.DiscreteScrollView;
+import com.yarolegovich.discretescrollview.transform.DiscreteScrollItemTransformer;
+import com.yarolegovich.discretescrollview.transform.Pivot;
+import com.yarolegovich.discretescrollview.transform.ScaleTransformer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.view.View.GONE;
 
-public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPlanListUseCase.Callback, BrowsePlanRecyclerViewAdapter.MealPlanViewContract {
+public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPlanListUseCase.Callback,
+        MealPlanPagerAdapter.CallBack,BrowsePlanRecyclerViewAdapter.MealPlanViewContract {
 
     private EditText searchBox;
     private ImageView ivClear;
@@ -51,9 +57,10 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
     List<MealPlan> searchData;
     List<MealPlan> myPlansData;
     private BrowsePlanRecyclerViewAdapter searchAdapter;
-    private BrowsePlanRecyclerViewAdapter myPlansAdapter;
+    private MealPlanPagerAdapter myPlansAdapter;
     private FetchMealPlanListUseCase myPlanListUseCase;
     private FetchMealPlanListUseCase searchFoodUseCase;
+    private DiscreteScrollView scroller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,17 +88,26 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
         myPlansData = new ArrayList<>();
 
         searchAdapter = new BrowsePlanRecyclerViewAdapter(searchData, this);
-        myPlansAdapter = new BrowsePlanRecyclerViewAdapter(myPlansData, this);
+        myPlansAdapter = new MealPlanPagerAdapter(myPlansData,this);
+        scroller.setAdapter(myPlansAdapter);
         //   getPresenter().fetchPopularMeals();
     }
 
     private void initUI() {
+/*
         pb.setVisibility(GONE);
         searchList.setLayoutManager(new LinearLayoutManager(this));
         myPlanList.setLayoutManager(new LinearLayoutManager(this));
         searchList.setAdapter(searchAdapter);
         myPlanList.setAdapter(myPlansAdapter);
+*/
 
+        scroller.setItemTransformer(new ScaleTransformer.Builder()
+                .setMaxScale(1.05f)
+                .setMinScale(0.8f)
+                .setPivotX(Pivot.X.CENTER) // CENTER is a default one
+                .setPivotY(Pivot.Y.BOTTOM) // CENTER is a default one
+                .build());
         if (myPlanListUseCase == null) {
             myPlanListUseCase = (FetchMealPlanListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_PLAN_LIST);
         }
@@ -99,7 +115,7 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
     }
 
     private void setUpListners() {
-        searchBox.addTextChangedListener(new TextWatcher() {
+        /*searchBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -115,7 +131,7 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
                 if (editable.toString().length() > 2)
                     performSearchForKey(editable.toString());
             }
-        });
+        });*/
     }
 
     private void performSearchForKey(String s) {
@@ -125,18 +141,20 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
         if (searchFoodUseCase == null) {
             searchFoodUseCase = (FetchMealPlanListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_PLAN_LIST);
         }
-        searchFoodUseCase.execute(this, false, currentSearchKey, false);
+        searchFoodUseCase.execute(this, true, currentSearchKey, false);
         //getPresenter().onFetchAllMeals(currentSearchKey);
     }
 
     private void initViewFields() {
-        searchBox = (EditText) findViewById(R.id.et_search_box);
+        /*searchBox = (EditText) findViewById(R.id.et_search_box);
         ivClear = (ImageView) findViewById(R.id.iv_clear_text);
         pb = (ProgressBar) findViewById(R.id.pb);
         searchCard = (ViewGroup) findViewById(R.id.card_search_result);
         popularCard = (ViewGroup) findViewById(R.id.card_popular_meals);
         searchList = (RecyclerView) findViewById(R.id.recycler_view_search);
-        myPlanList = (RecyclerView) findViewById(R.id.recycler_view_popular);
+        myPlanList = (RecyclerView) findViewById(R.id.recycler_view_popular);*/
+
+        scroller = (DiscreteScrollView)findViewById(R.id.scroller);
     }
 
 
@@ -176,7 +194,8 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
 
     @Override
     public void onMealPlanListFetched(List<MealPlan> plans, String searchKey, boolean isMyPlan) {
-        pb.setVisibility(GONE);
+        if(plans == null) plans = new ArrayList<>();
+//        pb.setVisibility(GONE);
         if (isMyPlan) {
             myPlansData.clear();
             myPlansData.addAll(plans);
@@ -201,5 +220,7 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
         getNavigator().navigateToFoodChartActivity(id);
         finish();
     }
+
+
 }
 

@@ -1,24 +1,23 @@
-package com.techticz.dietchart.backend;
+package com.techticz.dietchart.backend.endpoints;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-import com.google.appengine.api.files.FileServicePb;
 import com.google.appengine.repackaged.com.google.gson.Gson;
+import com.techticz.dietchart.backend.model.ImageDownloadRequest;
+import com.techticz.dietchart.backend.model.ImageDownloadResponse;
+import com.techticz.dietchart.backend.model.ImageUploadRequest;
+import com.techticz.dietchart.backend.model.ImageUploadResponse;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
-
-import javax.inject.Named;
 
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.entity.ContentType;

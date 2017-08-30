@@ -22,7 +22,7 @@
                 android:layout_gravity="center"
                 android:indeterminate="true" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
+            <com.techticz.app.ui.customview.RoundImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:id="@+id/iv_meal_image"

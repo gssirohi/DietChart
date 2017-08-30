@@ -5,9 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.google.api.client.util.IOUtils;
+import com.techticz.app.base.AppCore;
+import com.techticz.app.constant.Repositories;
 import com.techticz.app.domain.exception.AppRepositoryException;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
+import com.techticz.app.domain.repository.cache.CacheRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
@@ -41,7 +44,14 @@ public class FetchBlobInteractor extends BaseInteractor implements FetchBlobUseC
             Thread.sleep(300);
              Bitmap response = null;
             try {
-                response = appRepository.fetchBlob(this,blobKey,servingUrl);
+                response = ((CacheRepository) AppCore.getInstance().getProvider()
+                        .getAppRepository(Repositories.CACHE)).fetchBlob(this,blobKey,servingUrl);
+                if(response == null) {
+                    response = appRepository.fetchBlob(this, blobKey, servingUrl);
+                    ((CacheRepository) AppCore.getInstance().getProvider()
+                            .getAppRepository(Repositories.CACHE))
+                            .addBitmapToMemoryCache(servingUrl, response);
+                }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -49,6 +59,8 @@ public class FetchBlobInteractor extends BaseInteractor implements FetchBlobUseC
             if (!isCancelled()) {
 
                 final Bitmap finalResponse = response;
+
+
                 getMainThreadExecutor().execute(new Runnable() {
                         @Override
                         public void run() {

@@ -1,4 +1,4 @@
-package com.techticz.dietchart.backend;
+package com.techticz.dietchart.backend.model;
 
 /**
  * Created by gssirohi on 15/7/17.

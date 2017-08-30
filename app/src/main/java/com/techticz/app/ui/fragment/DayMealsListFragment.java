@@ -171,7 +171,12 @@ public class DayMealsListFragment extends Fragment implements DailyRoutineActivi
         this.routines.addAll(routines);
         getRecyclerAdapter().notifyDataSetChanged();
     }
-
+    @Override
+    public void updateMealInRoutine(int day,int routineId, Meal meal){
+        if (day != tabPosition) return;
+        routines.get(routineId-1).setMeal(meal);
+        getRecyclerAdapter().notifyDataSetChanged();
+    }
     //currently not working
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

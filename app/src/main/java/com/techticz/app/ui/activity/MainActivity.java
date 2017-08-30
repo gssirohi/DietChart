@@ -79,6 +79,8 @@ public class MainActivity extends BaseActivity implements CheckSystemHealthUseCa
         } else {
             getNavigator().navigateToFoodChartActivity(planId);
         }
+
+        //getNavigator().navigateToHealthDetailForm();
     }
 
     @Override

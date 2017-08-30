@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -27,6 +28,8 @@ import com.techticz.app.domain.interactor.FetchAllMealsUseCase;
 import com.techticz.app.domain.interactor.FetchMealListUseCase;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.ui.adapter.BrowseMealRecyclerViewAdapter;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,6 +135,8 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
         intent.putExtra("routineId", routineId);
         intent.putExtra("day", day);
         intent.putExtra("mealId", viewModel.getUid());
+        viewModel.setBitmap(null);
+        intent.putExtra("meal", Parcels.wrap(viewModel));
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -164,15 +169,17 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Key.CREATE_MEAL && resultCode == Activity.RESULT_OK) {
             Long mealId = data.getLongExtra("mealId", 0);
+            Parcelable mealParcel = data.getParcelableExtra("meal");
 //            int mealPlanId = data.getIntExtra("mealPlanId",0);
 //            int routineId = data.getIntExtra("routineId",0);
 //            int day = data.getIntExtra("day",-1);
-            if (mealId != null && mealId != 0) {
+            if (mealId != null && mealId != 0 && mealParcel != null) {
 
                 Intent intent = new Intent();
                 intent.putExtra("routineId", routineId);
                 intent.putExtra("day", day);
                 intent.putExtra("mealId", mealId);
+                intent.putExtra("meal",mealParcel);
                 setResult(RESULT_OK, intent);
                 finish();
             }

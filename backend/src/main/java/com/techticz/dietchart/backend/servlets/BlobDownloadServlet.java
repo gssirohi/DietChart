@@ -1,4 +1,4 @@
-package com.techticz.dietchart.backend;
+package com.techticz.dietchart.backend.servlets;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;

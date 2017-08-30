@@ -14,6 +14,7 @@ import com.techticz.app.domain.interactor.FetchAllMealsInteractor;
 import com.techticz.app.domain.interactor.FetchBlobInteractor;
 import com.techticz.app.domain.interactor.FetchFoodListInteractor;
 import com.techticz.app.domain.interactor.FetchImageInteractor;
+import com.techticz.app.domain.interactor.FetchMealDetailsInteractor;
 import com.techticz.app.domain.interactor.FetchMealListInteractor;
 import com.techticz.app.domain.interactor.FetchMealPlanListInteractor;
 import com.techticz.app.domain.interactor.FetchProductInteractor;
@@ -70,7 +71,7 @@ public class Provider {
                         , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case FETCH_PLAN_LIST:
                 return new FetchMealPlanListInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
-                        , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case CREATE_FOOD:
                 return new CreateFoodInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
                         , getMainThreadExecutor(), getAppRepository(Repositories.API));
@@ -79,19 +80,22 @@ public class Provider {
                         , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case CREATE_MEAL_PLAN:
                 return new CreateMealPlanInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
-                        , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case FETCH_MEAL_PLAN:
                 return new GetMealPlanInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
-                        , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case FETCH_DAY_MEALS:
                 return new FetchDayMealListInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
-                        , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case FETCH_MEAL_LIST:
                 return new FetchMealListInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
-                        , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
+            case FETCH_MEAL_DETAILS:
+                return new FetchMealDetailsInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case CREATE_AND_ADD_MEAL:
                 return new CreateMealInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
-                        , getMainThreadExecutor(), getAppRepository(Repositories.DATABASE));
+                        , getMainThreadExecutor(), getAppRepository(Repositories.API));
             case FETCH_PRODUCT_DETAILS:
                 return new FetchProductInteractor(context, getInteractorExecutor(context, InteractorExecutors.THREAD)
                         , getMainThreadExecutor(), getAppRepository(Repositories.API));

@@ -34,6 +34,8 @@ import com.techticz.app.domain.interactor.CreateFoodUseCase;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.ui.adapter.NewFoodPagerAdapter;
 
+import org.parceler.Parcels;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -413,7 +415,9 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
     @Override
     public void onFoodCreated(Food food) {
         Intent i = new Intent();
+        food.setBitmap(null);
         i.putExtra("foodId", food.getUid());
+        i.putExtra("food", Parcels.wrap(food));
         setResult(RESULT_OK, i);
         finish();
     }

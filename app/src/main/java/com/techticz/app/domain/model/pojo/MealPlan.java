@@ -4,10 +4,13 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverters;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.techticz.app.domain.model.Model;
+
+import org.parceler.Parcel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,72 +21,85 @@ import static com.techticz.app.domain.model.pojo.MealPlan.TableName;
  * Created by gssirohi on 8/7/17.
  */
 
+@Parcel
 @Entity(tableName = TableName)
 public class MealPlan extends Model {
     public final static String TableName = "meal_plans";
 
+    public MealPlan() {
+    }
 
     @SerializedName("uid")
     @Expose
     @PrimaryKey(autoGenerate = true)
-    private Long uid;
+     Long uid;
 
     @SerializedName("name")
     @Expose
     @ColumnInfo(name = "name")
-    private String name;
+     String name;
 
     @SerializedName("desc")
     @Expose
     @ColumnInfo(name = "desc")
-    private String desc;
+     String desc;
+
+    String blobServingUrl;
 
     @SerializedName("healthGoal")
     @Expose
     @ColumnInfo(name = "healthGoal")
-    private int healthGoal;
+     int healthGoal;
 
     @SerializedName("creater")
     @Expose
     @ColumnInfo(name = "creater")
-    private String creater;
+     String creater;
 
     @SerializedName("dailycalory")
     @Expose
     @ColumnInfo(name = "dailycalory")
-    private float dailyCalory;
+     float dailyCalory;
 
     @SerializedName("mondayMeals")
     @Expose
-    private DayMeals mondayMeals = new DayMeals();
+    DayMeals mondayMeals = new DayMeals();
 
     @SerializedName("tuesdayMeals")
     @Expose
-    private DayMeals tuesdayMeals = new DayMeals();
+     DayMeals tuesdayMeals = new DayMeals();
 
     @SerializedName("wednesdayMeals")
     @Expose
-    private DayMeals wednesdayMeals = new DayMeals();
+     DayMeals wednesdayMeals = new DayMeals();
 
     @SerializedName("thursdayMeals")
     @Expose
-    private DayMeals thursdayMeals = new DayMeals();
+     DayMeals thursdayMeals = new DayMeals();
 
     @SerializedName("fridayMeals")
     @Expose
 
-    private DayMeals fridayMeals = new DayMeals();
+     DayMeals fridayMeals = new DayMeals();
 
     @SerializedName("saturdayMeals")
     @Expose
 
-    private DayMeals saturdayMeals = new DayMeals();
+     DayMeals saturdayMeals = new DayMeals();
 
     @SerializedName("sundayMeals")
     @Expose
 
-    private DayMeals sundayMeals = new DayMeals();
+     DayMeals sundayMeals = new DayMeals();
 
+
+    public String getBlobServingUrl() {
+        return blobServingUrl;
+    }
+
+    public void setBlobServingUrl(String blobServingUrl) {
+        this.blobServingUrl = blobServingUrl;
+    }
 
     public static String getTableName() {
         return TableName;

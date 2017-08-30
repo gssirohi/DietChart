@@ -2,6 +2,9 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 
+import com.techticz.app.base.AppCore;
+import com.techticz.app.constant.AppErrors;
+import com.techticz.app.constant.Repositories;
 import com.techticz.app.domain.exception.AppRepositoryException;
 import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -37,7 +40,8 @@ public class FetchDayMealListInteractor extends BaseInteractor implements FetchD
             Thread.sleep(300);
 
             final List<Meal> meals = appRepository.getDayMealList(this, day, dayMeals);
-            final List<MealRoutine> routines = appRepository.getMealRoutinesByDay(this, day);
+            IAppRepository repo = AppCore.getInstance().getProvider().getAppRepository(Repositories.DATABASE);
+            final List<MealRoutine> routines = repo.getMealRoutinesByDay(this, day);
 
             int i = 0;
             for (MealRoutine routine : routines) {
@@ -64,6 +68,13 @@ public class FetchDayMealListInteractor extends BaseInteractor implements FetchD
                 });
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch(Exception e){
+            getMainThreadExecutor().execute(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onError(AppErrors.PRODUCT_LIST_NULL);
+                }
+            });
         }
     }
 

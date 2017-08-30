@@ -83,8 +83,10 @@ public class DailyRoutineTabFragment extends Fragment implements DayMealsListFra
 
     public void initializeTripList(View view) {
 
+/*
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         ((BaseActivity) getActivity()).setSupportActionBar(toolbar);
+*/
 
         initializePagerAdapter(view);
 
@@ -111,7 +113,7 @@ public class DailyRoutineTabFragment extends Fragment implements DayMealsListFra
         });
         mViewPager.setOffscreenPageLimit(0);
 
-        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
+        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
     }

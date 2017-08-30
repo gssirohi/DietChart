@@ -10,11 +10,13 @@ import com.techticz.app.domain.model.pojo.ComicsResponseContainer;
 import com.techticz.app.domain.model.pojo.Creator;
 import com.techticz.app.domain.model.pojo.CreatorDataContainer;
 import com.techticz.app.domain.model.pojo.CreatorResponseContainer;
+import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Event;
 import com.techticz.app.domain.model.pojo.EventDataContainer;
 import com.techticz.app.domain.model.pojo.EventResponseContainer;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
+import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.domain.model.pojo.Series;
 import com.techticz.app.domain.model.pojo.SeriesDataContainer;
 import com.techticz.app.domain.model.pojo.SeriesResponseContainer;
@@ -23,7 +25,11 @@ import com.techticz.app.domain.model.pojo.StoryDataContainer;
 import com.techticz.app.domain.model.pojo.StoryResponseContainer;
 import com.techticz.app.domain.repository.database.Converters;
 import com.techticz.app.network.ResponseContainer;
+
+import com.techticz.dietchart.backend.entities.mealPlanEntityApi.model.MealPlanEntityItem;
 import com.techticz.dietchart.backend.foodEntityApi.model.FoodEntity;
+import com.techticz.dietchart.backend.mealEntityApi.model.MealEntity;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -301,4 +307,86 @@ public class APIResponseMapper {
         e.setBlobKey(f.getBlobKey());
         return e;
     }
+
+    public MealEntity getEntityFromMeal(Meal m) {
+        MealEntity e = new MealEntity();
+        e.setUid(m.getUid());
+        e.setBlobKey(m.getBlobKey());
+        e.setBlobServingUrl(m.getBlobServingUrl());
+        e.setAddedFoods(Converters.addedFoodListToString(m.getAddedFoods()));
+        e.setCategory(m.getCategory());
+        e.setDesc(m.getDesc());
+        e.setName(m.getName());
+        e.setPrefRoutine(Converters.listToString(m.getPrefRoutine()));
+        e.setType(m.getType());
+        return e;
+    }
+
+    public List<Meal> getMealsFromEntity(List<MealEntity> es){
+        List<Meal> meals = new ArrayList<>();
+        if(es == null || es.isEmpty()) return meals;
+
+        for(MealEntity e:es) {
+            Meal m = new Meal();
+            m.setUid(e.getUid());
+            m.setBlobKey(e.getBlobKey());
+            m.setBlobServingUrl(e.getBlobServingUrl());
+            m.setAddedFoods(Converters.stringToAddedFoodList(e.getAddedFoods()));
+            m.setCategory(e.getCategory());
+            m.setDesc(e.getDesc());
+            m.setName(e.getName());
+            m.setPrefRoutine(Converters.stringtoList(e.getPrefRoutine()));
+            m.setType(e.getType());
+            meals.add(m);
+        }
+        return meals;
+    }
+
+    public MealPlanEntityItem getEntitiyFromMealPlan(MealPlan p) {
+        MealPlanEntityItem e = new MealPlanEntityItem();
+        e.setUid(p.getUid());
+        e.setName(p.getName());
+        e.setDesc(p.getDesc());
+        e.setCreater(p.getCreater());
+        e.setBlobServingUrl(p.getBlobServingUrl());
+        e.setDailyCalory(p.getDailyCalory());
+        e.setHealthGoal(p.getHealthGoal());
+        e.setMondayMeals(getEntityDayMeals(p.getMondayMeals()));
+        e.setTuesdayMeals(getEntityDayMeals(p.getTuesdayMeals()));
+        e.setWednesdayMeals(getEntityDayMeals(p.getWednesdayMeals()));
+        e.setThursdayMeals(getEntityDayMeals(p.getThursdayMeals()));
+        e.setFridayMeals(getEntityDayMeals(p.getFridayMeals()));
+        e.setSaturdayMeals(getEntityDayMeals(p.getSaturdayMeals()));
+        e.setSundayMeals(getEntityDayMeals(p.getSundayMeals()));
+        return e;
+    }
+
+    public MealPlan getMealPlanFromEntity(MealPlanEntityItem e) {
+        MealPlan plan = new MealPlan();
+        plan.setUid(e.getUid());
+        plan.setName(e.getName());
+        plan.setDesc(e.getDesc());
+        plan.setCreater(e.getCreater());
+        plan.setBlobServingUrl(e.getBlobServingUrl());
+        plan.setDailyCalory(e.getDailyCalory());
+        plan.setHealthGoal(e.getHealthGoal());
+        plan.setMondayMeals(getDBDayMeals(e.getMondayMeals()));
+        plan.setTuesdayMeals(getDBDayMeals(e.getTuesdayMeals()));
+        plan.setWednesdayMeals(getDBDayMeals(e.getWednesdayMeals()));
+        plan.setThursdayMeals(getDBDayMeals(e.getThursdayMeals()));
+        plan.setFridayMeals(getDBDayMeals(e.getFridayMeals()));
+        plan.setSaturdayMeals(getDBDayMeals(e.getSaturdayMeals()));
+        plan.setSundayMeals(getDBDayMeals(e.getSundayMeals()));
+        return plan;
+    }
+
+    private String getEntityDayMeals(DayMeals dayMeals) {
+        return Converters.dayMealToString(dayMeals);
+    }
+
+
+    private DayMeals getDBDayMeals(String dayMeals) {
+        return Converters.stringToDayMeals(dayMeals);
+    }
+
 }

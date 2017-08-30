@@ -107,4 +107,8 @@
     <string name="title_activity_create_meal">CreateMealActivity</string>
     <string name="title_activity_create_food">Create Food</string>
     <string name="title_activity_browse_meal_plan">BrowseMealPlanActivity</string>
+
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

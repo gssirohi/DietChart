@@ -39,8 +39,8 @@ public class MealPlanListItemView extends FrameLayout {
 
     public void fillDetails(MealPlan viewModel) {
         this.viewModel = viewModel;
-        TextView name = (TextView) findViewById(R.id.tv_plan_name);
-        TextView type = (TextView) findViewById(R.id.tv_plan_type);
+        TextView name = (TextView) findViewById(R.id.plan_name);
+        TextView type = (TextView) findViewById(R.id.plan_desc);
 
 //
         name.setText(viewModel.getName());

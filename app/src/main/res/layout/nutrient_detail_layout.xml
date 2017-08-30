@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:id="@+id/ll_nutritient_view_container"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Basic"
+        style="@style/Text.Dark.Large"
+        android:layout_marginBottom="16dp"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="212dp"
+        android:visibility="visible">
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:layout_width="wrap_content"
+            android:id="@+id/civ_calory"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_carbs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_fat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_protine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_fiber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+    </FrameLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Vitamins"
+        style="@style/Text.Dark.Large"
+        android:layout_marginBottom="16dp"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="212dp"
+        android:visibility="visible">
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_va"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_vb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_vc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_vd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_ve"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_vk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+    </FrameLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Minerals"
+        style="@style/Text.Dark.Large"
+        android:layout_marginBottom="16dp"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="212dp"
+        android:visibility="visible">
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_calcium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_sodium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_magnisium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_potasium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_zinc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_iron"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+    </FrameLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Others"
+        style="@style/Text.Dark.Large"
+        android:layout_marginBottom="16dp"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="112dp">
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_sugar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|left">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+        <com.techticz.app.ui.customview.CircleItemView
+            android:id="@+id/civ_cholestral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal">
+
+        </com.techticz.app.ui.customview.CircleItemView>
+
+    </FrameLayout>
+</LinearLayout>

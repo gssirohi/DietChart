@@ -13,9 +13,11 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.techticz.dietchart.backend.MyEndpoint,
-                com.techticz.dietchart.backend.FoodEntityEndpoint,
-                com.techticz.dietchart.backend.BlobEndPoint</param-value>
+            <param-value>com.techticz.dietchart.backend.endpoints.MyEndpoint,
+                com.techticz.dietchart.backend.endpoints.FoodEntityEndpoint,
+                com.techticz.dietchart.backend.endpoints.BlobEndPoint,
+                com.techticz.dietchart.backend.endpoints.MealEntityEndpoint,
+                com.techticz.dietchart.backend.endpoints.MealPlanEntityItemEndpoint</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
@@ -24,7 +26,7 @@
     </servlet-mapping>
     <servlet>
         <servlet-name>BlobUploadServlet</servlet-name>
-        <servlet-class>com.techticz.dietchart.backend.BlobUploadServlet</servlet-class>
+        <servlet-class>com.techticz.dietchart.backend.servlets.BlobUploadServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BlobUploadServlet</servlet-name>
@@ -32,7 +34,7 @@
     </servlet-mapping>
     <servlet>
         <servlet-name>BlobDownloadServlet</servlet-name>
-        <servlet-class>com.techticz.dietchart.backend.BlobDownloadServlet</servlet-class>
+        <servlet-class>com.techticz.dietchart.backend.servlets.BlobDownloadServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>BlobDownloadServlet</servlet-name>

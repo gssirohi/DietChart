@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -30,6 +31,9 @@ import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.ui.adapter.BrowseFoodRecyclerViewAdapter;
 import com.techticz.app.ui.adapter.BrowseMealRecyclerViewAdapter;
 import com.techticz.app.ui.viewmodel.contract.IMealViewModel;
+
+import org.parceler.Parcel;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,6 +180,8 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
         //RETURN BACK TO CREATE MEAL ACTIVITY
         Intent intent = new Intent();
         intent.putExtra("foodId", food.getUid());
+        Parcelable wrappedFood = Parcels.wrap(food);
+        intent.putExtra("food", wrappedFood);
         intent.putExtra("mealId", mealId);
         setResult(RESULT_OK, intent);
         finish();
@@ -190,6 +196,7 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
 
                 Intent intent = new Intent();
                 intent.putExtra("foodId", foodId);
+                intent.putExtra("food", data.getParcelableExtra("food"));
                 intent.putExtra("mealId", mealId);
                 setResult(RESULT_OK, intent);
                 finish();

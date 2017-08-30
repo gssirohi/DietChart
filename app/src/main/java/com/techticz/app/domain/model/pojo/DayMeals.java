@@ -1,11 +1,20 @@
 package com.techticz.app.domain.model.pojo;
 
+import org.parceler.Parcel;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by gssirohi on 8/7/17.
  */
 
+@Parcel
 public class DayMeals {
-    private long r1, r2, r3, r4, r5, r6, r7;
+     long r1, r2, r3, r4, r5, r6, r7;
+
+    public DayMeals() {
+    }
 
     public Long getR1() {
         return r1;
@@ -88,5 +97,17 @@ public class DayMeals {
                 break;
 
         }
+    }
+
+    public long[] getAllIds() {
+        long[] list =  new long[7];
+        list[0] = getR1();
+        list[1] = getR2();
+        list[2] = getR3();
+        list[3] = getR4();
+        list[4] = getR5();
+        list[5] = getR6();
+        list[6] = getR7();
+        return list;
     }
 }

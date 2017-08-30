@@ -1,4 +1,4 @@
-package com.techticz.dietchart.backend;
+package com.techticz.dietchart.backend.servlets;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -8,6 +8,7 @@ import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.images.ServingUrlOptions;
 import com.google.appengine.repackaged.com.google.gson.Gson;
 import com.google.cloud.sql.jdbc.internal.Exceptions;
+import com.techticz.dietchart.backend.model.ImageUploadResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;

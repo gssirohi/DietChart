@@ -117,7 +117,7 @@ public class CacheRepository implements IAppRepository {
     }
 
     @Override
-    public int createMeal(BaseInteractor interactor, Meal meal) {
+    public long createMeal(BaseInteractor interactor, Meal meal) {
         return 0;
     }
 
@@ -183,11 +183,16 @@ public class CacheRepository implements IAppRepository {
 
     @Override
     public Bitmap fetchBlob(BaseInteractor interactor, String blobKey,String servingurl) throws MalformedURLException {
-        return null;
+        return mImageMemoryCache.get(servingurl);
     }
 
     @Override
     public long updateMeal(BaseInteractor interactor, Meal meal) {
         return 0;
+    }
+
+    @Override
+    public Meal getMealDetails(BaseInteractor interactor, long mealId) {
+        return null;
     }
 }

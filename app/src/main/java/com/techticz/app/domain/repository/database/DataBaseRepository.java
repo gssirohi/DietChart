@@ -251,8 +251,14 @@ public class DataBaseRepository implements IAppRepository {
     }
 
     @Override
-    public int createMeal(BaseInteractor interactor, Meal meal) {
-        int id = (int) db.mealDao().insert(meal);
+    public Meal getMealDetails(BaseInteractor i, long mealId) {
+        Meal meal = db.mealDao().getById(mealId);
+        return meal;
+    }
+
+    @Override
+    public long createMeal(BaseInteractor interactor, Meal meal) {
+        long id =  db.mealDao().insert(meal);
         return id;
     }
 

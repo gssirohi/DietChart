@@ -1,67 +1,60 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<LinearLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_margin="8dp"
-    android:padding="4dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    card_view:cardCornerRadius="5dp"
+    card_view:cardElevation="4dp"
+    card_view:cardBackgroundColor="@color/white"
+    card_view:cardUseCompatPadding="true">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="160dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:background="@color/meal_item_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/app_icon"/>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:layout_marginLeft="16dp">
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:hint="Plan Name"
+    android:id="@+id/plan_name"
+    android:layout_margin="5dp"
+    style="@style/Text.Dark.Large"
+    />
     <TextView
+        android:id="@+id/plan_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Meal Plan Name"
-        style="@style/Text.Light.Large.Bold"
-        android:id="@+id/tv_plan_name"
+        android:hint="Plan Description"
+        android:layout_marginLeft="5dp"
+        android:layout_marginBottom="10dp"
+        style="@style/Text.Dark.Small"
         />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tv_plan_type"
-        android:hint="Health Goal Type"
-        android:layout_marginTop="4dp"
-        style="@style/Text.Light"/>
-    </LinearLayout>
 
-    <View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="@color/divider">
-    </View>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:orientation="vertical"
+    <ImageView
+        android:id="@+id/plan_image"
+        android:layout_width="match_parent"
+        android:layout_height="148dp"
+        android:src="@drawable/bg_card_7"
+        android:scaleType="centerCrop"/>
+    <TextView
+        android:id="@+id/plan_calory"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="16dp"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="280"
-            style="@style/Text.Light.VeryLarge.Bold"
-            android:layout_gravity="end"
-            android:textColor="@color/highlighted_text_color"
-            android:id="@+id/tv_daily_calories"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Daily Calories"
-            android:layout_gravity="end"
-            style="@style/Text.Light"/>
-    </LinearLayout>
+        android:padding="8dp"
+        android:background="@color/add_more_product_text_color"
+        android:gravity="center"
+        android:text="1500 kCal"
+        android:textColor="@color/white"
+        />
+</LinearLayout>
+</android.support.v7.widget.CardView>
 </LinearLayout>

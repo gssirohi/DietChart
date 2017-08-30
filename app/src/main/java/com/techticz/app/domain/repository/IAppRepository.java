@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import com.techticz.app.domain.interactor.CreateFoodInteractor;
 import com.techticz.app.domain.interactor.CreateMealInteractor;
 import com.techticz.app.domain.interactor.FetchBlobInteractor;
+import com.techticz.app.domain.interactor.FetchMealDetailsInteractor;
 import com.techticz.app.domain.interactor.FetchMealListInteractor;
 import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Food;
@@ -33,7 +34,7 @@ public interface IAppRepository {
 
     List<MealRoutine> getMealRoutinesByDay(BaseInteractor interactor, int day);
 
-    int createMeal(BaseInteractor interactor, Meal meal);
+    long createMeal(BaseInteractor interactor, Meal meal);
 
     int addMealToRoutineWeek(BaseInteractor interactor, Integer id, int routineId, int day);
 
@@ -63,4 +64,6 @@ public interface IAppRepository {
 
 
     long updateMeal(BaseInteractor interactor, Meal meal);
+
+    Meal getMealDetails(BaseInteractor interactor, long mealId);
 }

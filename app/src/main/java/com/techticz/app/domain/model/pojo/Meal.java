@@ -12,49 +12,57 @@ import com.google.gson.annotations.SerializedName;
 import com.techticz.app.domain.model.Model;
 import com.techticz.app.domain.model.ProductModel;
 
+import org.parceler.Parcel;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(tableName = Meal.TableName)
+@Parcel
 public class Meal extends Model {
 
     public final static String TableName = "meals";
+
+    public Meal() {
+    }
+
     @SerializedName("uid")
     @Expose
     @PrimaryKey(autoGenerate = true)
-    private Long uid;
+     Long uid;
 
 
     @SerializedName("name")
     @Expose
-    private String name;
+     String name;
 
     @SerializedName("desc")
     @Expose
-    private String desc;
+     String desc;
 
     @SerializedName("type")
     @Expose
-    private Integer type;
+     Integer type;
 
     @SerializedName("category")
     @Expose
-    private Integer category;
+     Integer category;
 
     @SerializedName("prefRoutine")
     @Expose
-    private List<Integer> prefRoutine;
+     List<Integer> prefRoutine;
 
     @SerializedName("addedFoods")
     @Expose
-    private List<AddedFood> addedFoods;
+     List<AddedFood> addedFoods;
 
     @SerializedName("foodIds")
     @Expose
-    private List<Long> foodIds;
+     List<Long> foodIds;
     @Ignore
-    private Bitmap bitmap;
-    private String blobServingUrl;
-    private String blobKey;
+     Bitmap bitmap;
+     String blobServingUrl;
+     String blobKey;
 
     public Long getUid() {
         return uid;
@@ -137,6 +145,7 @@ public class Meal extends Model {
     }
 
     public List<AddedFood> getAddedFoods() {
+        if(addedFoods == null) addedFoods = new ArrayList<>();
         return addedFoods;
     }
 

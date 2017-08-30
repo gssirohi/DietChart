@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginRight="4dp"/>
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.techticz.app.ui.customview.RoundImageView
         android:id="@+id/civ_food"
         android:layout_width="60dp"
         android:layout_height="60dp"

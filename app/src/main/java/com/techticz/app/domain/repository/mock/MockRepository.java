@@ -41,7 +41,7 @@ public class MockRepository implements IAppRepository {
     }
 
     @Override
-    public int createMeal(BaseInteractor interactor, Meal meal) {
+    public long createMeal(BaseInteractor interactor, Meal meal) {
         return 0;
     }
 
@@ -113,5 +113,10 @@ public class MockRepository implements IAppRepository {
     @Override
     public long updateMeal(BaseInteractor interactor, Meal meal) {
         return 0;
+    }
+
+    @Override
+    public Meal getMealDetails(BaseInteractor interactor, long mealId) {
+        return null;
     }
 }

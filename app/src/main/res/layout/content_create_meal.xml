@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
+        android:visibility="visible"
         android:orientation="vertical">
         <TextView
             android:layout_width="wrap_content"
@@ -115,7 +116,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:orientation="vertical">
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:animateLayoutChanges="true">
 
         <TextView
             android:layout_width="wrap_content"
@@ -173,6 +176,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
+        android:animateLayoutChanges="true"
         android:orientation="vertical">
 
     <TextView
@@ -185,13 +189,10 @@
         android:text="Nutrition Information"/>
 
 
-        <LinearLayout
-            android:id="@+id/ll_nutritient_view_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-        </LinearLayout>
+<include
+    layout="@layout/nutrient_detail_layout"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"></include>
     </LinearLayout>
     </android.support.v7.widget.CardView>
 </LinearLayout>

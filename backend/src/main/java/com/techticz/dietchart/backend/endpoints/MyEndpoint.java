@@ -4,11 +4,13 @@
    https://github.com/GoogleCloudPlatform/gradle-appengine-templates/tree/master/HelloEndpoints
 */
 
-package com.techticz.dietchart.backend;
+package com.techticz.dietchart.backend.endpoints;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
+import com.techticz.dietchart.backend.model.Response;
+import com.techticz.dietchart.backend.model.SystemHealth;
 
 import javax.inject.Named;
 
