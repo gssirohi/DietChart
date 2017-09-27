@@ -13,7 +13,7 @@ import com.techticz.app.domain.model.Model;
 import static com.techticz.app.domain.model.pojo.MealRoutine.TableName;
 
 @Entity(tableName = TableName)
-public class MealRoutine extends Model {
+public class MealRoutine  {
 
     public final static String TableName = "meal_routine";
 

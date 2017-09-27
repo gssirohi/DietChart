@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
-import android.util.Base64;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -14,8 +13,11 @@ import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 import com.techticz.app.constant.AppAPIMethods;
 import com.techticz.app.constant.AppConstants;
+import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.Products;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.interactor.CreateFoodInteractor;
+import com.techticz.app.domain.interactor.LoginInteractor;
 import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -29,11 +31,11 @@ import com.techticz.app.network.RequestMethod;
 import com.techticz.app.network.ResponseContainer;
 import com.techticz.app.network.ServiceRequest;
 import com.techticz.app.utility.CommonUtils;
+import com.techticz.dietchart.backend.appUserApi.AppUserApi;
+import com.techticz.dietchart.backend.appUserApi.model.AppUser;
+import com.techticz.dietchart.backend.appUserApi.model.UserLoginResponse;
 import com.techticz.dietchart.backend.blobApi.BlobApi;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
-import com.techticz.dietchart.backend.entities.mealPlanEntityApi.model.CollectionResponseMealPlanEntityItem;
-import com.techticz.dietchart.backend.entities.mealPlanEntityApi.model.MealPlanEntityItem;
-import com.techticz.dietchart.backend.entities.mealPlanEntityApi.MealPlanEntityApi;
 import com.techticz.dietchart.backend.foodEntityApi.FoodEntityApi;
 import com.techticz.dietchart.backend.foodEntityApi.model.CollectionResponseFoodEntity;
 import com.techticz.dietchart.backend.foodEntityApi.model.FoodEntity;
@@ -41,6 +43,9 @@ import com.techticz.dietchart.backend.mealEntityApi.MealEntityApi;
 import com.techticz.dietchart.backend.mealEntityApi.model.CollectionResponseMealEntity;
 import com.techticz.dietchart.backend.mealEntityApi.model.MealEntity;
 
+import com.techticz.dietchart.backend.mealPlanEntityApi.MealPlanEntityApi;
+import com.techticz.dietchart.backend.mealPlanEntityApi.model.CollectionResponseMealPlanEntityItem;
+import com.techticz.dietchart.backend.mealPlanEntityApi.model.MealPlanEntityItem;
 import com.techticz.dietchart.backend.myApi.MyApi;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
@@ -49,7 +54,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,9 +62,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static com.google.api.client.http.HttpMethods.POST;
 
 
 /**
@@ -72,17 +73,35 @@ public class APIRepository implements IAppRepository {
     private final BlobApi blobApi;
     private final MealEntityApi mealAPI;
     private final MealPlanEntityApi mealPlanAPI;
+    private final AppUserApi appUserApi;
     private AppRestClient restClient;
     private MyApi myApiService;
 
     public APIRepository() {
         responseMapper = new APIResponseMapper();
+
+        AppUserApi.Builder appUserBuilder = new AppUserApi.Builder(AndroidHttp.newCompatibleTransport(),
+                new AndroidJsonFactory(), null)
+                // options for running against local devappserver
+                // - 10.0.2.2 is localhost's IP address in Android emulator
+                // - turn off compression when running against local devappserver
+                .setRootUrl(AppConstants.SERVER_ROOT_URL)
+                .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
+                    @Override
+                    public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
+                        abstractGoogleClientRequest.setDisableGZipContent(true);
+                    }
+                });
+        // end options for devappserver
+
+        appUserApi = appUserBuilder.build();
+
         MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                 new AndroidJsonFactory(), null)
                 // options for running against local devappserver
                 // - 10.0.2.2 is localhost's IP address in Android emulator
                 // - turn off compression when running against local devappserver
-                .setRootUrl("http://diet-chart-app.appspot.com/_ah/api/")
+                .setRootUrl(AppConstants.SERVER_ROOT_URL)
                 .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                     @Override
                     public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -98,7 +117,7 @@ public class APIRepository implements IAppRepository {
                 // options for running against local devappserver
                 // - 10.0.2.2 is localhost's IP address in Android emulator
                 // - turn off compression when running against local devappserver
-                .setRootUrl("https://diet-chart-app.appspot.com/_ah/api/")
+                .setRootUrl(AppConstants.SERVER_ROOT_URL)
                 .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                     @Override
                     public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -111,7 +130,7 @@ public class APIRepository implements IAppRepository {
                 // options for running against local devappserver
                 // - 10.0.2.2 is localhost's IP address in Android emulator
                 // - turn off compression when running against local devappserver
-                .setRootUrl("https://diet-chart-app.appspot.com/_ah/api/")
+                .setRootUrl(AppConstants.SERVER_ROOT_URL)
                 .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                     @Override
                     public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -124,7 +143,7 @@ public class APIRepository implements IAppRepository {
                 // options for running against local devappserver
                 // - 10.0.2.2 is localhost's IP address in Android emulator
                 // - turn off compression when running against local devappserver
-                .setRootUrl("https://diet-chart-app.appspot.com/_ah/api/")
+                .setRootUrl(AppConstants.SERVER_ROOT_URL)
                 .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                     @Override
                     public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -138,7 +157,7 @@ public class APIRepository implements IAppRepository {
                 // options for running against local devappserver
                 // - 10.0.2.2 is localhost's IP address in Android emulator
                 // - turn off compression when running against local devappserver
-                .setRootUrl("https://diet-chart-app.appspot.com/_ah/api/")
+                .setRootUrl(AppConstants.SERVER_ROOT_URL)
                 .setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
                     @Override
                     public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest) throws IOException {
@@ -159,6 +178,7 @@ public class APIRepository implements IAppRepository {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         } finally {
             return container;
         }
@@ -203,7 +223,6 @@ public class APIRepository implements IAppRepository {
         requestParams.put("hash", md5hash);
         requestParams.put("ts", timeStamp);
         request.setRequestParams(requestParams);
-
         return request;
     }
 
@@ -225,8 +244,8 @@ public class APIRepository implements IAppRepository {
 
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return meals;
     }
 
     @Override
@@ -240,6 +259,7 @@ public class APIRepository implements IAppRepository {
             meal  = l.get(0);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
         return meal;
     }
@@ -261,8 +281,8 @@ public class APIRepository implements IAppRepository {
             return r.getUid();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return 0l;
     }
 
     @Override
@@ -271,25 +291,30 @@ public class APIRepository implements IAppRepository {
     }
 
     @Override
-    public long createMealPlan(BaseInteractor interactor, MealPlan plan) {
+    public long createMealPlan(BaseInteractor interactor, MealPlan plan,Boolean autoLoad,List<Integer> prefRoutines) {
         try {
-            MealPlanEntityItem e = mealPlanAPI.insert(responseMapper.getEntitiyFromMealPlan(plan)).execute();
+            MealPlanEntityItem e = mealPlanAPI.insert(autoLoad,prefRoutines,responseMapper.getEntitiyFromMealPlan(plan)).execute();
             return e.getUid();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return plan.getUid();
     }
 
     @Override
-    public int updateMealPlan(BaseInteractor interactor, MealPlan plan) {
+    public MealPlan updateMealPlan(BaseInteractor interactor, MealPlan plan, boolean autoLoad, List<Integer> prefRoutines) {
         try {
-            MealPlanEntityItem p = mealPlanAPI.update(plan.getUid(), responseMapper.getEntitiyFromMealPlan(plan)).execute();
-            return 1;
+            if(prefRoutines == null){
+                prefRoutines = new ArrayList<>();
+                prefRoutines.add(1);
+            }
+            MealPlanEntityItem e = responseMapper.getEntitiyFromMealPlan(plan);
+            MealPlanEntityItem p = mealPlanAPI.update(plan.getUid(),autoLoad,prefRoutines, e).execute();
+            return responseMapper.getMealPlanFromEntity(p);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return 0;
     }
 
     @Override
@@ -299,8 +324,8 @@ public class APIRepository implements IAppRepository {
             return responseMapper.getMealPlanFromEntity(e);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return null;
     }
 
     @Override
@@ -336,8 +361,8 @@ public class APIRepository implements IAppRepository {
 
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return foods;
     }
 
     @Override
@@ -347,8 +372,8 @@ public class APIRepository implements IAppRepository {
             return r.getUid();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return 0l;
     }
 
     @Override
@@ -365,8 +390,8 @@ public class APIRepository implements IAppRepository {
             return plans;
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return null;
     }
 
     @Override
@@ -377,8 +402,8 @@ public class APIRepository implements IAppRepository {
             return health;
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return null;
     }
 
     @Override
@@ -389,38 +414,7 @@ public class APIRepository implements IAppRepository {
 
     @Override
     public ImageUploadResponse uploadImage(BaseInteractor interactor, Bitmap bitmap, String imageName) {
-/*// Important! you wanna rescale your bitmap (e.g. with Bitmap.createScaledBitmap)
-        // as with full-size pictures the base64 representation would not fit in memory
-
-        // encode bitmap into byte array (very resource-wasteful!)
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        bitmap.recycle();
-        bitmap = null;
-        stream = null;
-
-        // Note: We encode ourselves, instead of using image.encodeImageData, as this would throw
-        //       an 'Illegal character '_' in base64 content' exception
-        // See: http://stackoverflow.com/questions/22029170/upload-photos-from-android-app-to-google-cloud-storage-app-engine-illegal-char
-        String base64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
-        byteArray = null;
-
-        // Upload via AppEngine Endpoint (ImageUploadRequest is a generated model)
-        ImageUploadRequest image = new ImageUploadRequest();
-        image.setImageData(base64);
-        image.setImageName(imageName);
-        image.setMimeType("image/jpeg");
-        ImageUploadResponse response = null;
-        try {
-            response = blobApi.uploadImage(image).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return response;*/
-
-//------------------------------------
-
+        if(bitmap == null) return null;
         Map config = new HashMap();
         config.put("cloud_name", AppConstants.CLOUDINARY_CLOUD_NAME);
         config.put("api_key", AppConstants.CLOUDINARY_API_KEY);
@@ -441,8 +435,8 @@ public class APIRepository implements IAppRepository {
             return resp;
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return null;
 //----------------------------------
 
         // Upload via AppEngine Endpoint (ImageUploadRequest is a generated model)
@@ -468,8 +462,8 @@ public class APIRepository implements IAppRepository {
             return r.getUid();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return 0l;
     }
 
     @Override
@@ -497,24 +491,51 @@ public class APIRepository implements IAppRepository {
             return bitmap;
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         } finally {
 
         }
-        return null;
     }
 
     @Override
     public long updateMeal(BaseInteractor interactor, Meal meal) {
         try {
             mealAPI.update(meal.getUid(),responseMapper.getEntityFromMeal(meal)).execute();
+            return meal.getUid();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
         }
-        return meal.getUid();
     }
 
     @Override
     public Meal getMealDetails(BaseInteractor interactor, long mealId) {
         return getMealById(interactor,mealId);
+    }
+
+    @Override
+    public UserLoginResponse login(LoginInteractor loginInteractor, AppUser appUser) {
+        try {
+            return appUserApi.login(appUser).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new AppException(AppErrors.REPOSITORY);
+        }
+
+    }
+
+    @Override
+    public void insertFoods(BaseInteractor interactor, List<Food> foods) {
+
+    }
+
+    @Override
+    public void insertMeals(BaseInteractor interactor, List<Meal> mealList) {
+
+    }
+
+    @Override
+    public void insertMealPlans(LoginInteractor loginInteractor, List<MealPlan> mealPlans) {
+
     }
 }

@@ -1,16 +1,12 @@
 package com.techticz.app.ui.activity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,16 +20,12 @@ import com.techticz.app.R;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.base.BaseActivity;
 import com.techticz.app.constant.AppErrors;
-import com.techticz.app.constant.Key;
 import com.techticz.app.constant.UseCases;
 import com.techticz.app.domain.interactor.FetchMealPlanListUseCase;
-import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.MealPlan;
-import com.techticz.app.ui.adapter.BrowseFoodRecyclerViewAdapter;
 import com.techticz.app.ui.adapter.BrowsePlanRecyclerViewAdapter;
 import com.techticz.app.ui.adapter.MealPlanPagerAdapter;
 import com.yarolegovich.discretescrollview.DiscreteScrollView;
-import com.yarolegovich.discretescrollview.transform.DiscreteScrollItemTransformer;
 import com.yarolegovich.discretescrollview.transform.Pivot;
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer;
 
@@ -54,13 +46,14 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
     private RecyclerView myPlanList;
     private String currentSearchKey;
 
-    List<MealPlan> searchData;
+    List<MealPlan> recommendedPlansData;
     List<MealPlan> myPlansData;
-    private BrowsePlanRecyclerViewAdapter searchAdapter;
+    private MealPlanPagerAdapter recommendedAdapter;
     private MealPlanPagerAdapter myPlansAdapter;
     private FetchMealPlanListUseCase myPlanListUseCase;
     private FetchMealPlanListUseCase searchFoodUseCase;
-    private DiscreteScrollView scroller;
+    private DiscreteScrollView scrollerRecommendedPlans;
+    private DiscreteScrollView scrollerMyPlans;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,25 +77,24 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
 
     private void initData() {
 
-        searchData = new ArrayList<>();
+        recommendedPlansData = new ArrayList<>();
         myPlansData = new ArrayList<>();
 
-        searchAdapter = new BrowsePlanRecyclerViewAdapter(searchData, this);
-        myPlansAdapter = new MealPlanPagerAdapter(myPlansData,this);
-        scroller.setAdapter(myPlansAdapter);
-        //   getPresenter().fetchPopularMeals();
+        recommendedAdapter = new MealPlanPagerAdapter(recommendedPlansData, this);
+        myPlansAdapter = new MealPlanPagerAdapter(myPlansData, this);
+        scrollerRecommendedPlans.setAdapter(recommendedAdapter);
+        scrollerMyPlans.setAdapter(myPlansAdapter);
+
     }
 
     private void initUI() {
-/*
-        pb.setVisibility(GONE);
-        searchList.setLayoutManager(new LinearLayoutManager(this));
-        myPlanList.setLayoutManager(new LinearLayoutManager(this));
-        searchList.setAdapter(searchAdapter);
-        myPlanList.setAdapter(myPlansAdapter);
-*/
-
-        scroller.setItemTransformer(new ScaleTransformer.Builder()
+        scrollerRecommendedPlans.setItemTransformer(new ScaleTransformer.Builder()
+                .setMaxScale(1.05f)
+                .setMinScale(0.8f)
+                .setPivotX(Pivot.X.CENTER) // CENTER is a default one
+                .setPivotY(Pivot.Y.BOTTOM) // CENTER is a default one
+                .build());
+        scrollerMyPlans.setItemTransformer(new ScaleTransformer.Builder()
                 .setMaxScale(1.05f)
                 .setMinScale(0.8f)
                 .setPivotX(Pivot.X.CENTER) // CENTER is a default one
@@ -111,7 +103,9 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
         if (myPlanListUseCase == null) {
             myPlanListUseCase = (FetchMealPlanListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_PLAN_LIST);
         }
-        myPlanListUseCase.execute(this, false, "", true);
+
+        myPlanListUseCase.execute(this, true, "", true);
+
     }
 
     private void setUpListners() {
@@ -146,15 +140,8 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
     }
 
     private void initViewFields() {
-        /*searchBox = (EditText) findViewById(R.id.et_search_box);
-        ivClear = (ImageView) findViewById(R.id.iv_clear_text);
-        pb = (ProgressBar) findViewById(R.id.pb);
-        searchCard = (ViewGroup) findViewById(R.id.card_search_result);
-        popularCard = (ViewGroup) findViewById(R.id.card_popular_meals);
-        searchList = (RecyclerView) findViewById(R.id.recycler_view_search);
-        myPlanList = (RecyclerView) findViewById(R.id.recycler_view_popular);*/
-
-        scroller = (DiscreteScrollView)findViewById(R.id.scroller);
+        scrollerRecommendedPlans = (DiscreteScrollView)findViewById(R.id.scroller);
+        scrollerMyPlans = (DiscreteScrollView)findViewById(R.id.scroller_my_plans);
     }
 
 
@@ -200,11 +187,16 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
             myPlansData.clear();
             myPlansData.addAll(plans);
             myPlansAdapter.notifyDataSetChanged();
-        } else if (currentSearchKey.equalsIgnoreCase(searchKey)) {
-            pb.setVisibility(GONE);
-            searchData.clear();
-            searchData.addAll(plans);
-            searchAdapter.notifyDataSetChanged();
+
+            myPlanListUseCase.execute(this, true, "", false);
+        } else if (currentSearchKey != null && currentSearchKey.equalsIgnoreCase(searchKey)) {
+            recommendedPlansData.clear();
+            recommendedPlansData.addAll(plans);
+            recommendedAdapter.notifyDataSetChanged();
+        } else {
+            recommendedPlansData.clear();
+            recommendedPlansData.addAll(plans);
+            recommendedAdapter.notifyDataSetChanged();
         }
 
     }

@@ -2,7 +2,7 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
@@ -40,7 +40,7 @@ public class GetMealPlanInteractor extends BaseInteractor implements GetMealPlan
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch all characters");
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {

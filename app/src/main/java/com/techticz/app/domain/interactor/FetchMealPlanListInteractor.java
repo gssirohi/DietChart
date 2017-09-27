@@ -2,7 +2,7 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
@@ -45,7 +45,7 @@ public class FetchMealPlanListInteractor extends BaseInteractor implements Fetch
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch plans");
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
@@ -70,7 +70,13 @@ public class FetchMealPlanListInteractor extends BaseInteractor implements Fetch
         this.callback = callback;
         this.searchKey = searchKey;
         this.isMyPlan = isMyPlan;
-        if (showLoader) showDialog("Searching meal plans .. ");
+
+        if (showLoader){
+            if(isMyPlan)
+            showDialog("Searching your meal plans .. ");
+            else
+                showDialog("Searching recommended meal plans .. ");
+        }
         getInteractorExecutor().performAction(this);
     }
 }

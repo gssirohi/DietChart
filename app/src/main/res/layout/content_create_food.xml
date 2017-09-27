@@ -8,10 +8,29 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.techticz.app.ui.activity.CreateFoodActivity"
     tools:showIn="@layout/activity_create_food">
-        <com.techticz.app.ui.customview.NonSwipableViewPager
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+        <com.tecticz.powerkit.ui.customview.NonSwipableViewPager
             android:id="@+id/vp_new_food"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="gone"
             />
-
+        <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/new_food_basic"></include>
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/new_food_serving"></include>
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/new_food_nutrients"></include>
+        </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

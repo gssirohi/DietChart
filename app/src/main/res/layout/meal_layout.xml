@@ -22,7 +22,7 @@
                 android:layout_gravity="center"
                 android:indeterminate="true" />
 
-            <com.techticz.app.ui.customview.RoundImageView
+            <com.tecticz.powerkit.ui.customview.RoundImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:id="@+id/iv_meal_image"
@@ -42,124 +42,63 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Meal Name"
-                    android:textAppearance="?attr/textAppearanceListItem"
                     android:layout_gravity="center_vertical"
-                    android:textStyle="bold" />
+                    style="@style/Text.Dark.Large" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Vegeterian"
+                    style="@style/Text.Light"
                     android:id="@+id/tv_meal_type"
-                    android:textColor="@android:color/holo_green_dark"
+                    android:text="vegiterian"
                     android:layout_gravity="center_vertical" />
 
 
                 <TextView
+                    android:id="@+id/tv_meal_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:text="Boiled potao with onion tomato gravy, served with butter roti"
-                    android:id="@+id/tv_meal_desc"
+                    android:layout_gravity="bottom"
                     android:layout_marginTop="10dp"
-                    android:layout_gravity="bottom" />
+                    android:text="Boiled potao with onion tomato gravy, served with butter roti"
+                    style="@style/Text.Dark.Small" />
             </LinearLayout>
         </LinearLayout>
-
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp">
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:id="@+id/ll_nutritient_view_container">
 
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+            <include
+                layout="@layout/label_value_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/label_value_calory"
+                android:layout_weight="1" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Calories"
-                    android:id="@+id/tv_nutri_label_1"
-                    style="@style/Text.Light"
-                    android:textColor="@color/highlighted_text_color"
-                    android:textStyle="bold" />
+            <include
+                layout="@layout/label_value_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/label_value_carbs"
+                android:layout_weight="1" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="270 gm"
-                    android:id="@+id/tv_nutri_1" />
-            </LinearLayout>
+            <include
+                layout="@layout/label_value_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/label_value_fat"
+                android:layout_weight="1" />
 
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Carbs"
-                    android:textColor="@color/colorAccent"
-                    android:id="@+id/tv_nutri_label_2"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="70 gm"
-                    android:id="@+id/tv_nutri_2" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Fats"
-                    android:textColor="@color/colorAccent"
-                    android:id="@+id/tv_nutri_label_3"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="50 gm"
-                    android:id="@+id/tv_nutri_3" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Amino Acid"
-                    android:id="@+id/tv_nutri_label_4"
-                    android:textColor="@color/colorAccent"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="30 ml"
-                    android:id="@+id/tv_nutri_4" />
-            </LinearLayout>
-
+            <include
+                layout="@layout/label_value_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/label_value_protine"
+                android:layout_weight="1" />
         </LinearLayout>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -167,6 +106,6 @@
         android:text="Explore"
         android:layout_gravity="end"
         android:textAllCaps="true"
-        android:textColor="@color/colorPrimary"
+        style="@style/TextAction"
         android:id="@+id/tv_meal_explore" />
     </LinearLayout>

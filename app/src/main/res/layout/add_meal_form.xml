@@ -4,7 +4,7 @@
     android:background="@android:color/background_light"
     android:layout_height="match_parent">
 
-<android.support.design.widget.TextInputLayout
+        <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -12,19 +12,21 @@
 
     >
     <android.support.design.widget.TextInputEditText
+                style="@style/Text.Light.Medium"
         android:layout_width="match_parent"
         android:hint="Meal Name"
         android:imeOptions="actionNext"
         android:layout_height="wrap_content" />
 </android.support.design.widget.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+            <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:id="@+id/til_meal_type"
         >
         <android.support.design.widget.TextInputEditText
+                style="@style/Text.Light.Medium"
             android:layout_width="match_parent"
             android:hint="Meal Type"
             android:imeOptions="actionNext"
@@ -33,13 +35,14 @@
             android:layout_height="wrap_content" />
     </android.support.design.widget.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+            <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:id="@+id/til_meal_desc"
         >
         <android.support.design.widget.TextInputEditText
+                style="@style/Text.Light.Medium"
 
             android:layout_width="match_parent"
             android:hint="Meal Description"

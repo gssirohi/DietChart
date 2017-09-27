@@ -2,15 +2,10 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 
-import com.techticz.app.domain.exception.AppRepositoryException;
-import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
-import com.techticz.app.utility.AppLogger;
-
-import java.util.List;
 
 /**
  * Created by gssirohi on 15/7/16.
@@ -47,7 +42,7 @@ public class FetchAllMealsInteractor extends BaseInteractor implements FetchAllM
                 });
 *//*
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch routines for day " + day);
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {

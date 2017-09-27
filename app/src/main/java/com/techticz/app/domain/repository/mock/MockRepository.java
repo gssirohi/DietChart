@@ -3,6 +3,7 @@ package com.techticz.app.domain.repository.mock;
 import android.graphics.Bitmap;
 
 import com.techticz.app.domain.interactor.CreateFoodInteractor;
+import com.techticz.app.domain.interactor.LoginInteractor;
 import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -10,6 +11,8 @@ import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.domain.model.pojo.MealRoutine;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
+import com.techticz.dietchart.backend.appUserApi.model.AppUser;
+import com.techticz.dietchart.backend.appUserApi.model.UserLoginResponse;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
@@ -51,13 +54,13 @@ public class MockRepository implements IAppRepository {
     }
 
     @Override
-    public long createMealPlan(BaseInteractor interactor, MealPlan plan) {
+    public long createMealPlan(BaseInteractor interactor, MealPlan plan,Boolean b,List<Integer> pRoutines) {
         return 0;
     }
 
     @Override
-    public int updateMealPlan(BaseInteractor interactor, MealPlan plan) {
-        return 0;
+    public MealPlan updateMealPlan(BaseInteractor interactor, MealPlan plan, boolean autoLoad, List<Integer> prefRoutines) {
+        return null;
     }
 
     @Override
@@ -118,5 +121,25 @@ public class MockRepository implements IAppRepository {
     @Override
     public Meal getMealDetails(BaseInteractor interactor, long mealId) {
         return null;
+    }
+
+    @Override
+    public UserLoginResponse login(LoginInteractor loginInteractor, AppUser appUser) {
+        return null;
+    }
+
+    @Override
+    public void insertFoods(BaseInteractor interactor, List<Food> foods) {
+
+    }
+
+    @Override
+    public void insertMeals(BaseInteractor interactor, List<Meal> mealList) {
+
+    }
+
+    @Override
+    public void insertMealPlans(LoginInteractor loginInteractor, List<MealPlan> mealPlans) {
+
     }
 }

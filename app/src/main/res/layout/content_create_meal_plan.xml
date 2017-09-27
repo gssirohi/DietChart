@@ -15,35 +15,62 @@
         android:padding="16dp"
         android:orientation="vertical">
 
-        <android.support.design.widget.TextInputLayout
+                <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/til_plan_name">
-            <android.support.design.widget.TextInputEditText
+<android.support.design.widget.TextInputEditText
+    style="@style/Text.Light.Medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Plan Name"/>
         </android.support.design.widget.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
+                <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/til_plan_desc">
-            <android.support.design.widget.TextInputEditText
+<android.support.design.widget.TextInputEditText
+    style="@style/Text.Light.Medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Plan Description"/>
         </android.support.design.widget.TextInputLayout>
 
 
-        <android.support.design.widget.TextInputLayout
+                <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/til_plan_calory">
-            <android.support.design.widget.TextInputEditText
+<android.support.design.widget.TextInputEditText
+    style="@style/Text.Light.Medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
                 android:hint="Approx. Daily Calories"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:id="@+id/cb_auto_load"
+            android:text="Auto Load Meals"
+            style="@style/Text.Dark.Medium"/>
+        <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/til_auto_load_pref_routines">
+            <android.support.design.widget.TextInputEditText
+                style="@style/Text.Light.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:editable="false"
+                android:focusable="false"
+                android:drawableEnd="@drawable/ic_keyboard_arrow_right"
+                android:drawableRight="@drawable/ic_keyboard_arrow_right"
+                android:drawableTint="@color/colorAccent"
+                android:hint="Choose Preferred Routines"/>
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

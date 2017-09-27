@@ -1,129 +1,39 @@
 package com.techticz.dietchart.backend.entities;
 
+import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Embedded;
 
 import com.google.appengine.repackaged.com.google.gson.annotations.Expose;
 import com.google.appengine.repackaged.com.google.gson.annotations.SerializedName;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import ch.boye.httpclientandroidlib.util.TextUtils;
 
 /**
  * Created by YATRAONLINE\gyanendra.sirohi on 29/8/17.
  */
 @Entity
-public class MealPlanEntityItem {
-    public final static String TableName = "meal_plans";
-
-    public MealPlanEntityItem() {
-    }
-
-    @SerializedName("uid")
-    @Expose
-    @Id
-    Long uid;
-
-    @SerializedName("name")
-    @Expose
-    String name;
-
-    @SerializedName("desc")
-    @Expose
-    String desc;
-
-    String blobServingUrl;
-
-    @SerializedName("healthGoal")
-    @Expose
-    int healthGoal;
-
-    @SerializedName("creater")
-    @Expose
-    String creater;
-
-    @SerializedName("dailycalory")
-    @Expose
-    float dailyCalory;
-
-    @SerializedName("mondayMeals")
-    @Expose
-    @Embedded
+public class MealPlanEntityItem  extends Model{
     String mondayMeals;
 
-    @SerializedName("tuesdayMeals")
-    @Expose
-    @Embedded
     String tuesdayMeals;
 
-    @SerializedName("wednesdayMeals")
-    @Expose
-    @Embedded
     String wednesdayMeals;
-
-    @SerializedName("thursdayMeals")
-    @Expose
-    
     String thursdayMeals;
 
-    @SerializedName("fridayMeals")
-    @Expose
-    @Embedded
-
     String fridayMeals;
-
-    @SerializedName("saturdayMeals")
-    @Expose
-    @Embedded
     String saturdayMeals;
-
-    @SerializedName("sundayMeals")
-    @Expose
-    @Embedded
     String sundayMeals;
 
+    int healthGoal;
+    float dailyCalory;
 
-    public static String getTableName() {
-        return TableName;
-    }
-
-    public String getBlobServingUrl() {
-        return blobServingUrl;
-    }
-
-    public void setBlobServingUrl(String blobServingUrl) {
-        this.blobServingUrl = blobServingUrl;
-    }
-
-    public Long getUid() {
-        return uid;
-    }
-
-    public void setUid(Long uid) {
-        this.uid = uid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public float getDailyCalory() {
-        return dailyCalory;
-    }
-
-    public void setDailyCalory(float dailyCalory) {
-        this.dailyCalory = dailyCalory;
-    }
+    private String mutualMealIds;
 
     public String getMondayMeals() {
         return mondayMeals;
@@ -181,6 +91,53 @@ public class MealPlanEntityItem {
         this.sundayMeals = sundayMeals;
     }
 
+
+    public List<Long> getMutualMealIds() {
+        List<Long> exclusive = new ArrayList<>();
+        List<Long> daymeals;
+        daymeals = stringtoLongList(getMondayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        daymeals = stringtoLongList(getTuesdayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        daymeals = stringtoLongList(getWednesdayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        daymeals = stringtoLongList(getThursdayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        daymeals = stringtoLongList(getFridayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        daymeals = stringtoLongList(getSaturdayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        daymeals = stringtoLongList(getSundayMeals());
+        exclusive.removeAll(daymeals);
+        exclusive.addAll(daymeals);
+        return exclusive;
+    }
+
+    public static List<Long> stringtoLongList(String str) {
+        List<Long> list = new ArrayList<>();
+        if(TextUtils.isEmpty(str)) return list;
+
+        String[] ids = str.split(":");
+
+        for (String num : ids) {
+            try {
+                list.add(Long.parseLong(num));
+            } catch (Exception e) {
+
+            }
+        }
+        return list;
+    }
+
+    public void setMutualMealIds(String mutualMealIds) {
+        this.mutualMealIds = mutualMealIds;
+    }
     public int getHealthGoal() {
         return healthGoal;
     }
@@ -188,13 +145,14 @@ public class MealPlanEntityItem {
     public void setHealthGoal(int healthGoal) {
         this.healthGoal = healthGoal;
     }
-
-    public String getCreater() {
-        return creater;
+    public float getDailyCalory() {
+        return dailyCalory;
     }
 
-    public void setCreater(String creater) {
-        this.creater = creater;
+    public void setDailyCalory(float dailyCalory) {
+        this.dailyCalory = dailyCalory;
     }
+
+
 }
 

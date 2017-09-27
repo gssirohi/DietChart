@@ -1,1 +1,1 @@
-include ':app', ':fcm', ':backend'
+include ':app', ':fcm', ':backend', ':auth', ':powerkit'

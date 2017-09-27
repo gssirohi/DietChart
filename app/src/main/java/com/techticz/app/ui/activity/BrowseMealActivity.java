@@ -8,6 +8,7 @@ import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -77,6 +78,10 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
 
         searchAdapter = new BrowseMealRecyclerViewAdapter(searchData, this);
         popularAdapter = new BrowseMealRecyclerViewAdapter(popularData, this);
+
+        if (searchMealUseCase == null) {
+            searchMealUseCase = (FetchMealListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_LIST);
+        }
         //getPresenter().fetchPopularMeals();
     }
 
@@ -86,6 +91,7 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
         popularList.setLayoutManager(new LinearLayoutManager(this));
         searchList.setAdapter(searchAdapter);
         popularList.setAdapter(popularAdapter);
+        searchMealUseCase.execute(this,false,"",new long[]{});
     }
 
     private void setUpListners() {
@@ -112,9 +118,6 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
         currentSearchKey = s.toString();
         pb.setVisibility(View.VISIBLE);
         //getPresenter().onFetchAllMeals(currentSearchKey);
-        if (searchMealUseCase == null) {
-            searchMealUseCase = (FetchMealListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_LIST);
-        }
         searchMealUseCase.execute(this, false, currentSearchKey, new long[]{});
     }
 
@@ -202,11 +205,16 @@ public class BrowseMealActivity extends BaseActivity implements BrowseMealRecycl
 
     @Override
     public void onMealListFetched(List<Meal> meals, String searchKey) {
-        if (currentSearchKey.equalsIgnoreCase(searchKey)) {
+        if (!TextUtils.isEmpty(searchKey) && currentSearchKey.equalsIgnoreCase(searchKey)) {
             pb.setVisibility(GONE);
             searchData.clear();
             searchData.addAll(meals);
             searchAdapter.notifyDataSetChanged();
+        } else {
+            pb.setVisibility(GONE);
+            popularData.clear();
+            popularData.addAll(meals);
+            popularAdapter.notifyDataSetChanged();
         }
     }
 }

@@ -1,7 +1,10 @@
 package com.techticz.app.ui.customview;
 
+import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +15,12 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.techticz.app.R;
-import com.techticz.app.base.AppCore;
-import com.techticz.app.constant.AppErrors;
+import com.techticz.app.base.BaseActivity;
 import com.techticz.app.constant.FoodType;
 import com.techticz.app.constant.Servings;
-import com.techticz.app.constant.UseCases;
-import com.techticz.app.domain.interactor.FetchBlobUseCase;
 import com.techticz.app.domain.interactor.FetchImageInteractor;
 import com.techticz.app.domain.model.pojo.Food;
-import com.techticz.app.ui.viewmodel.contract.IMealViewModel;
+import com.tecticz.powerkit.ui.customview.RoundImageView;
 
 
 /**
@@ -36,6 +36,7 @@ public class FoodListItemView extends FrameLayout {
     private SelectionListner foodSelectListner;
     private EditText et_serving;
     private TextView tv_serving_label;
+    private TextView tv_details;
 
     public FoodListItemView(Context context) {
         super(context);
@@ -72,7 +73,39 @@ public class FoodListItemView extends FrameLayout {
         cb_food = (CheckBox)findViewById(R.id.cb_food);
         et_serving = (EditText)findViewById(R.id.et_serving);
         tv_serving_label = (TextView)findViewById(R.id.tv_serving_label);
+        tv_details = (TextView)findViewById(R.id.tv_details);
+        tv_details.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleDetailsClick();
+            }
+        });
+
         et_serving.setEnabled(false);
+        et_serving.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if(editable != null && !TextUtils.isEmpty(editable.toString())){
+                    if(foodSelectListner != null){
+                        foodSelectListner.onFoodServingChanged(viewModel,Integer.parseInt(editable.toString()));
+                    }
+                }
+            }
+        });
+    }
+
+    private void handleDetailsClick() {
+        ((BaseActivity)getContext()).getNavigator().navigateToFoodDetailsActivity((Activity) getContext(),0l,viewModel.getUid());
     }
 
     public void setFoodSelectListner(SelectionListner foodSelectListner) {
@@ -135,5 +168,7 @@ public class FoodListItemView extends FrameLayout {
 
     public interface SelectionListner{
         public void onFoodSelectionChanged(long id,boolean b);
+
+        void onFoodServingChanged(Food viewModel, int i);
     }
 }

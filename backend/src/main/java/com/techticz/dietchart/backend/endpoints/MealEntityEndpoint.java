@@ -18,6 +18,8 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 
+import ch.boye.httpclientandroidlib.util.TextUtils;
+
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
@@ -136,9 +138,14 @@ public class MealEntityEndpoint {
             name = "mealList",
             path = "mealEntities",
             httpMethod = ApiMethod.HttpMethod.GET)
-    public CollectionResponse<MealEntity> list(@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit) {
+    public CollectionResponse<MealEntity> list(@Nullable @Named("routineKey") String routineKey,@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit) {
         limit = limit == null ? DEFAULT_LIST_LIMIT : limit;
-        Query<MealEntity> query = ofy().load().type(MealEntity.class).limit(limit);
+        Query<MealEntity> query;
+        if(TextUtils.isEmpty(routineKey)) {
+            query = ofy().load().type(MealEntity.class).limit(limit);
+        } else {
+            query = ofy().load().type(MealEntity.class).limit(limit).filter(routineKey,true);
+        }
         if (cursor != null) {
             query = query.startAt(Cursor.fromWebSafeString(cursor));
         }

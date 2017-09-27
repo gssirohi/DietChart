@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginRight="4dp"/>
-    <com.techticz.app.ui.customview.RoundImageView
+    <com.tecticz.powerkit.ui.customview.RoundImageView
         android:id="@+id/civ_food"
         android:layout_width="60dp"
         android:layout_height="60dp"
@@ -39,6 +39,16 @@
         android:hint="Meal type"
         android:layout_marginTop="4dp"
         style="@style/Text.Light"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_details"
+            android:hint="Explore"
+            android:text="Explore"
+            android:gravity="end"
+            android:layout_gravity="end"
+            android:layout_marginTop="4dp"
+            style="@style/TextAction"/>
     </LinearLayout>
 
     <View
@@ -46,6 +56,8 @@
         android:layout_height="match_parent"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="2dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
         android:background="@color/divider">
     </View>
     <LinearLayout
@@ -53,7 +65,6 @@
         android:orientation="vertical"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="16dp"
         >
         <EditText
             android:layout_width="60dp"
@@ -63,7 +74,7 @@
             android:layout_gravity="end"
             android:gravity="center"
             android:inputType="number"
-            android:textColor="@color/highlighted_text_color"
+            android:textColor="@color/colorAccent"
             android:id="@+id/et_serving"
             />
         <TextView

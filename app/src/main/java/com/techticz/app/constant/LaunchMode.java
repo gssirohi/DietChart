@@ -5,7 +5,7 @@ package com.techticz.app.constant;
  */
 public enum LaunchMode {
 
-CREATE(0),VIEW(1),EDIT(2);
+CREATE(0),VIEW(1),EDIT(2), CREATE_COPY(3);
     public int code;
     private LaunchMode(int code) {
         this.code = code;
@@ -15,6 +15,7 @@ CREATE(0),VIEW(1),EDIT(2);
         if(mode == 0) return CREATE;
         if(mode == 1) return VIEW;
         if(mode == 2) return EDIT;
+        if(mode == 3) return CREATE_COPY;
         return VIEW;
     }
 }

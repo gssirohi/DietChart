@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -44,4 +45,6 @@ public interface FoodDao {
     @Query("SELECT * FROM " + Food.TableName + " WHERE name LIKE :searchKey")
     List<Food> getAllContains(String searchKey);
 
+    @Update
+    int update(Food f);
 }

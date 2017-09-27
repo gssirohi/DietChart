@@ -8,6 +8,7 @@ import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,7 +58,7 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
     private BrowseFoodRecyclerViewAdapter popularAdapter;
 
     private FetchFoodListUseCase searchFoodUseCase;
-    private int mealId;
+    private long mealId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,11 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
 
         searchAdapter = new BrowseFoodRecyclerViewAdapter(searchData, this);
         popularAdapter = new BrowseFoodRecyclerViewAdapter(popularData, this);
+
+
+        if (searchFoodUseCase == null) {
+            searchFoodUseCase = (FetchFoodListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_FOOD_LIST);
+        }
         //   getPresenter().fetchPopularMeals();
     }
 
@@ -86,6 +92,7 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
         popularList.setLayoutManager(new LinearLayoutManager(this));
         searchList.setAdapter(searchAdapter);
         popularList.setAdapter(popularAdapter);
+        searchFoodUseCase.execute(this,false,"",new Long[]{});
     }
 
     private void setUpListners() {
@@ -112,9 +119,6 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
         currentSearchKey = s.toString();
         pb.setVisibility(View.VISIBLE);
 
-        if (searchFoodUseCase == null) {
-            searchFoodUseCase = (FetchFoodListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_FOOD_LIST);
-        }
         searchFoodUseCase.execute(this, false, currentSearchKey, new Long[]{});
         //getPresenter().onFetchAllMeals(currentSearchKey);
     }
@@ -167,11 +171,16 @@ public class BrowseFoodActivity extends BaseActivity implements BrowseFoodRecycl
 
     @Override
     public void onFoodListFetched(List<Food> foods, String searchKey) {
-        if (currentSearchKey.equalsIgnoreCase(searchKey)) {
+        if (!TextUtils.isEmpty(searchKey) && currentSearchKey.equalsIgnoreCase(searchKey)) {
             pb.setVisibility(GONE);
             searchData.clear();
             searchData.addAll(foods);
             searchAdapter.notifyDataSetChanged();
+        } else {
+            pb.setVisibility(GONE);
+            popularData.clear();
+            popularData.addAll(foods);
+            popularAdapter.notifyDataSetChanged();
         }
     }
 

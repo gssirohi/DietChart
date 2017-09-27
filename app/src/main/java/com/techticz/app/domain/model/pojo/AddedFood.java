@@ -1,5 +1,8 @@
 package com.techticz.app.domain.model.pojo;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import org.parceler.Parcel;
 
 /**
@@ -8,8 +11,14 @@ import org.parceler.Parcel;
 
 @Parcel
 public class AddedFood {
+    @SerializedName("uid")
+    @Expose
      Long foodId;
+    @SerializedName("uid")
+    @Expose
      int serving;
+    @SerializedName("uid")
+    @Expose
      Food food;
 
     public AddedFood() {
@@ -54,4 +63,14 @@ public class AddedFood {
     public Food getFood() {
         return food;
     }
+
+    public NutitionInfo extractNutritions() {
+        NutitionInfo nf = new NutitionInfo();
+        nf.add(getFood().extractNutritions());
+        nf.applyServing(getServing());
+        return nf;
+    }
+
+
+
 }

@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.dietchart.auth.utils.LoginUtils;
 import com.techticz.app.R;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.base.BaseActivity;
@@ -33,7 +34,9 @@ import com.techticz.app.domain.interactor.CreateMealUseCase;
 import com.techticz.app.domain.interactor.FetchBlobUseCase;
 import com.techticz.app.domain.interactor.FetchFoodListUseCase;
 import com.techticz.app.domain.interactor.FetchMealDetailsUseCase;
+import com.techticz.app.domain.interactor.IExtractNutritientUseCase;
 import com.techticz.app.domain.model.pojo.AddedFood;
+import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.model.pojo.NutitionInfo;
@@ -56,7 +59,7 @@ import static com.techticz.app.constant.LaunchMode.VIEW;
 
 public class CreateMealActivity extends BaseActivity implements  CreateMealUseCase.Callback
         ,  FetchBlobUseCase.Callback
-         ,FoodListItemView.SelectionListner, FetchMealDetailsUseCase.Callback {
+         ,FoodListItemView.SelectionListner, FetchMealDetailsUseCase.Callback, IExtractNutritientUseCase.Callback {
 
     private TextInputLayout til_meal_name;
     private TextInputLayout til_meal_desc;
@@ -105,6 +108,7 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
 
     private void provideData() {
         if(mealId != 0){
+            collapsingToolBar.setTitle("Loading Meal..");
            // FetchMealListUseCase usecase = (FetchMealListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_LIST);
             FetchMealDetailsUseCase usecase = (FetchMealDetailsUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_DETAILS);
             usecase.execute(this,true,mealId);
@@ -171,6 +175,8 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
                 handlePrefRoutineClick();
             }
         });
+        til_meal_category.setVisibility(GONE);
+        til_meal_type.setVisibility(GONE);
         changeMode(mode);
     }
 
@@ -331,8 +337,8 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
 
         getMeal().setName(til_meal_name.getEditText().getText().toString());
         getMeal().setDesc(til_meal_desc.getEditText().getText().toString());
-        getMeal().setType(FoodType.getIdByName(til_meal_type.getEditText().getText().toString()));
-        getMeal().setCategory(FoodCategory.getIdByName(til_meal_category.getEditText().getText().toString()));
+       // getMeal().setType(FoodType.getIdByName(til_meal_type.getEditText().getText().toString()));
+       // getMeal().setCategory(FoodCategory.getIdByName(til_meal_category.getEditText().getText().toString()));
         String prefRoutines = til_meal_pref_routine.getEditText().getText().toString();
         String[] routines = prefRoutines.split(",");
         List<Integer> pRoutines = new ArrayList<>();
@@ -360,6 +366,8 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
             getMeal().setBlobServingUrl("");
             getMeal().setBlobKey("");
         }
+        if(TextUtils.isEmpty(getMeal().getCreator()))
+            getMeal().setCreator(LoginUtils.getUserCredential());
         CreateMealUseCase usecase = (CreateMealUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_AND_ADD_MEAL);
         usecase.execute(this, getMeal(), true);
     }
@@ -375,6 +383,7 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
             return false;
         }
 
+/*
         if (TextUtils.isEmpty(til_meal_type.getEditText().getText())) {
             Toast.makeText(this, "Please Select Meal Type", Toast.LENGTH_SHORT).show();
             return false;
@@ -384,8 +393,9 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
             Toast.makeText(this, "Please Select Meal Category", Toast.LENGTH_SHORT).show();
             return false;
         }
+*/
 
-        if (TextUtils.isEmpty(til_meal_category.getEditText().getText())) {
+        if (TextUtils.isEmpty(til_meal_pref_routine.getEditText().getText())) {
             Toast.makeText(this, "Please Choose Preferred Routines", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -444,6 +454,11 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
     }
 
     @Override
+    public void onNutritionFetched(NutitionInfo meal, NutitionInfo dayMeals, NutitionInfo plan) {
+        updateMealNutritionInfo(meal);
+    }
+
+    @Override
     public void onMealDetailsFetched(Meal meal) {
         setMeal(meal);
         loadUIwithMeal();
@@ -458,8 +473,8 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
     private void loadUIwithMeal() {
         til_meal_name.getEditText().setText(getMeal().getName());
         til_meal_desc.getEditText().setText(getMeal().getDesc());
-        til_meal_type.getEditText().setText(FoodType.getById(getMeal().getType()).lable);
-        til_meal_category.getEditText().setText(FoodCategory.getById(getMeal().getType()).lable);
+        //til_meal_type.getEditText().setText(FoodType.getById(getMeal().getType()).lable);
+        //til_meal_category.getEditText().setText(FoodCategory.getById(getMeal().getType()).lable);
         setPrefRoutinesFromCode(til_meal_pref_routine,getMeal().getPrefRoutine());
         clearFoodViews();
         displayAddedFoods(getMeal().getAddedFoods());
@@ -469,14 +484,8 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
     }
 
     private void calculateMealNutritions() {
-        List<AddedFood> afs = getMeal().getAddedFoods();
-        NutitionInfo totalN = new NutitionInfo();
-        for(AddedFood af : afs){
-            NutitionInfo nf = af.getFood().extractNutritions();
-            totalN.add(nf);
-        }
-
-        updateMealNutritionInfo(totalN);
+        IExtractNutritientUseCase usecase = (IExtractNutritientUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CALCULATE_NUTRI);
+        usecase.execute(this,false,getMeal(),null,null);
     }
 
     private void clearFoodViews() {
@@ -578,6 +587,12 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
         }
     }
 
+    @Override
+    public void onFoodServingChanged(Food viewModel, int serving) {
+        getMeal().updateFoodServing(viewModel.getUid(),serving);
+        calculateMealNutritions();
+    }
+
     private void updateRemoveButtonVisibility() {
         int children = ll_food_container.getChildCount();
         List<Long> foods = new ArrayList<>();
@@ -592,6 +607,7 @@ public class CreateMealActivity extends BaseActivity implements  CreateMealUseCa
     }
 
     public void updateMealNutritionInfo(NutitionInfo info){
+        getMeal().setNutritionInfo(info);
         ((CircleItemView)findViewById(R.id.civ_calory)).set("Calory",info.getCalory());
         ((CircleItemView)findViewById(R.id.civ_carbs)).set("Carbs",info.getCarbs());
         ((CircleItemView)findViewById(R.id.civ_fat)).set("Fat",info.getFat());

@@ -19,6 +19,7 @@ import com.techticz.app.R;
 import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.ui.activity.BrowseMealPlanActivity;
 import com.techticz.app.ui.fragment.DayMealsListFragment;
+import com.tecticz.powerkit.ui.customview.AppImageView;
 
 import java.util.Calendar;
 import java.util.List;
@@ -44,10 +45,10 @@ public class MealPlanPagerAdapter extends RecyclerView.Adapter<MealPlanPagerAdap
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        holder.planImage.setImageResource(R.drawable.bg_card_3);
+        holder.planImage.setUrl(data.get(position).getBlobServingUrl());
         holder.planName.setText(data.get(position).getName());
         holder.planDesc.setText(data.get(position).getDesc());
-        holder.planCalory.setText(""+data.get(position).getDailyCalory());
+        holder.planCalory.setText("Daily Calories : "+data.get(position).getDailyCalory());
         holder.planImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -63,14 +64,14 @@ public class MealPlanPagerAdapter extends RecyclerView.Adapter<MealPlanPagerAdap
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView planImage;
+        private AppImageView planImage;
         private TextView planName;
         private TextView planDesc;
         private TextView planCalory;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            planImage = (ImageView) itemView.findViewById(R.id.plan_image);
+            planImage = (AppImageView) itemView.findViewById(R.id.plan_image);
             planName = (TextView)itemView.findViewById(R.id.plan_name);
             planDesc = (TextView)itemView.findViewById(R.id.plan_desc);
             planCalory = (TextView)itemView.findViewById(R.id.plan_calory);

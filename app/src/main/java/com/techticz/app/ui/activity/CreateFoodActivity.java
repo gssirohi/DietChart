@@ -6,31 +6,38 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.dietchart.auth.utils.LoginUtils;
 import com.techticz.app.R;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.FoodCategory;
 import com.techticz.app.constant.FoodType;
-import com.techticz.app.constant.Key;
+import com.techticz.app.constant.LaunchMode;
 import com.techticz.app.constant.Routines;
 import com.techticz.app.constant.Servings;
 import com.techticz.app.constant.Units;
 import com.techticz.app.constant.UseCases;
 import com.techticz.app.domain.interactor.CreateFoodUseCase;
+import com.techticz.app.domain.interactor.FetchBlobUseCase;
+import com.techticz.app.domain.interactor.FetchFoodListUseCase;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.ui.adapter.NewFoodPagerAdapter;
 
@@ -38,12 +45,15 @@ import org.parceler.Parcels;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import static android.view.View.GONE;
 import static com.techticz.app.constant.Key.GET_FROM_GALLERY;
+import static com.techticz.app.constant.LaunchMode.CREATE;
+import static com.techticz.app.constant.LaunchMode.EDIT;
+import static com.techticz.app.constant.LaunchMode.VIEW;
 
-public class CreateFoodActivity extends AppCompatActivity implements CreateFoodUseCase.Callback, NewFoodPagerAdapter.OnPageCreatedListner {
+public class CreateFoodActivity extends AppCompatActivity implements CreateFoodUseCase.Callback, FetchFoodListUseCase.Callback, FetchBlobUseCase.Callback {
 
     private TextInputLayout til_name;
     private TextInputLayout til_desc;
@@ -64,7 +74,6 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
     private TextInputLayout til_vitaminC;
     private TextInputLayout til_cholestrol;
     private TextInputLayout til_sugar;
-    private ViewPager pager;
     private TextInputLayout til_zinc;
     private TextInputLayout til_magnisium;
     private TextInputLayout til_vitaminD;
@@ -76,36 +85,48 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
     private FloatingActionButton fabB;
     private ImageView iv_food;
     private Bitmap foodBitmap;
+    private long mealId;
+    private long foodId;
+    private LaunchMode mode;
+    private CollapsingToolbarLayout collapsingToolBar;
+    private Food food;
+    private boolean editablility;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_food);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        collapsingToolBar = (CollapsingToolbarLayout)findViewById(R.id.toolbar_layout);
         setSupportActionBar(toolbar);
-
+        collapsingToolBar.setTitle("Loading Food.");
+        initData();
         initUI();
-        iv_food = (ImageView)findViewById(R.id.iv_food);
-        fabB = (FloatingActionButton) findViewById(R.id.fab);
-        fabB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleSubmitClick();
-            }
-        });
+        provideData();
+        changeMode(mode);
 
         // add back arrow to toolbar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        fabB.setImageResource(R.drawable.ic_arrow_forward);
-        iv_food.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handleImageClick(view);
-            }
-        });
+
+    }
+    private void initData() {
+        mealId = getIntent().getLongExtra("mealId",0);
+        foodId = getIntent().getLongExtra("foodId",0);
+        mode = LaunchMode.getById(getIntent().getIntExtra("mode",0));
+    }
+
+    private void provideData() {
+        if(foodId != 0){
+            collapsingToolBar.setTitle("Loading Food..");
+            // FetchMealListUseCase usecase = (FetchMealListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_MEAL_LIST);
+            FetchFoodListUseCase usecase = (FetchFoodListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_FOOD_LIST);
+            usecase.execute(this,true,"",new Long[]{foodId});
+        } else {
+            collapsingToolBar.setTitle("Create Food");
+        }
     }
 
     private void handleImageClick(View view) {
@@ -117,15 +138,7 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
     public boolean onOptionsItemSelected(MenuItem item) {
         // handle arrow click here
         if (item.getItemId() == android.R.id.home) {
-            int index = pager.getCurrentItem();
-            if (index == 2 || index == 1) {
-                fabB.setImageResource(R.drawable.ic_arrow_forward);
-            }
-            if (index != 0) {
-                pager.setCurrentItem(index - 1, true);
-            } else {
                 finish();
-            }
             // close this activity and return to preview activity (if there is any)
         }
 
@@ -136,10 +149,105 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
 
         NestedScrollView nsv = (NestedScrollView) findViewById(R.id.nsv);
         nsv.setFillViewport(true);
+        iv_food = (ImageView)findViewById(R.id.iv_food);
+        fabB = (FloatingActionButton) findViewById(R.id.fab);
+        fabB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleSubmitClick();
+            }
+        });
+        fabB.setImageResource(R.drawable.ic_arrow_forward);
+        iv_food.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleImageClick(view);
+            }
+        });
 
-        pager = (ViewPager) findViewById(R.id.vp_new_food);
 
-        pager.setAdapter(new NewFoodPagerAdapter(this, this));
+        til_name = (TextInputLayout) findViewById(R.id.til_food_name);
+        til_desc = (TextInputLayout) findViewById(R.id.til_food_desc);
+        til_type = (TextInputLayout) findViewById(R.id.til_food_type);
+        til_category = (TextInputLayout) findViewById(R.id.til_food_category);
+        til_pref_routines = (TextInputLayout) findViewById(R.id.til_food_pref_routines);
+
+        til_type.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleTypeClick();
+            }
+        });
+
+        til_category.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleCategoryClick();
+            }
+        });
+        til_pref_routines.setVisibility(GONE);
+        til_pref_routines.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handlePrefRoutineClick();
+            }
+        });
+
+        til_serving = (TextInputLayout) findViewById(R.id.til_food_serving);
+        til_unit = (TextInputLayout) findViewById(R.id.til_food_unit);
+        til_content = (TextInputLayout) findViewById(R.id.til_food_content);
+
+        til_content.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                updateFoodContentHeaders();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+        til_serving.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleServingClick();
+            }
+        });
+
+        til_unit.getEditText().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleUnitClick();
+            }
+        });
+        til_calory = (TextInputLayout) findViewById(R.id.til_food_calory);
+        til_fat = (TextInputLayout) findViewById(R.id.til_food_fat);
+        til_protine = (TextInputLayout) findViewById(R.id.til_food_protine);
+        til_carbs = (TextInputLayout) findViewById(R.id.til_food_carbs);
+        til_fiber = (TextInputLayout) findViewById(R.id.til_food_fiber);
+
+        til_calcium = (TextInputLayout) findViewById(R.id.til_food_calcium);
+        til_sodium = (TextInputLayout) findViewById(R.id.til_food_sodium);
+        til_potassium = (TextInputLayout) findViewById(R.id.til_food_potassium);
+        til_iron = (TextInputLayout) findViewById(R.id.til_food_iron);
+        til_zinc = (TextInputLayout) findViewById(R.id.til_food_zinc);
+        til_magnisium = (TextInputLayout) findViewById(R.id.til_food_magnisium);
+
+        til_vitaminA = (TextInputLayout) findViewById(R.id.til_food_vitaminA);
+        til_vitaminB = (TextInputLayout) findViewById(R.id.til_food_vitaminB12);
+        til_vitaminC = (TextInputLayout) findViewById(R.id.til_food_vitaminC);
+        til_vitaminD = (TextInputLayout) findViewById(R.id.til_food_vitaminD);
+        til_vitaminE = (TextInputLayout) findViewById(R.id.til_food_vitaminE);
+        til_vitaminK = (TextInputLayout) findViewById(R.id.til_food_vitaminK);
+
+        til_cholestrol = (TextInputLayout) findViewById(R.id.til_food_cholestrol);
+        til_sugar = (TextInputLayout) findViewById(R.id.til_food_sugar);
 
     }
 
@@ -182,11 +290,68 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                         setFoodItemValue(til_serving, text);
+                        updateFoodContentHeaders();
                         return true;
                     }
                 })
                 .positiveText(R.string.choose)
                 .show();
+    }
+
+    private void updateFoodContentHeaders() {
+        TextView nutri = (TextView)findViewById(R.id.tv_nutients_header);
+        TextView vit = (TextView)findViewById(R.id.tv_vitamins_heading);
+        TextView min = (TextView)findViewById(R.id.tv_minerals_heading);
+        TextView oth = (TextView)findViewById(R.id.tv_other_heading);
+
+        String serving = "";
+        String content = "";
+        String unit = "";
+        if(TextUtils.isEmpty(til_serving.getEditText().getText())){
+            serving = "serving";
+        } else {
+            serving = til_serving.getEditText().getText().toString();
+        }
+        if(TextUtils.isEmpty(til_content.getEditText().getText())){
+            content = "";
+        } else {
+            content = til_content.getEditText().getText().toString();
+        }
+        if(TextUtils.isEmpty(til_unit.getEditText().getText())){
+            unit = "";
+        } else {
+            unit = til_unit.getEditText().getText().toString();
+        }
+
+        String n = "Nutrients";
+        String v = "Vitamins";
+        String m = "Minerals";
+        String o = "Other Contents";
+        if(TextUtils.isEmpty(serving)){
+            n = n+" Per Serving";
+            m = m+" Per Serving";
+            v = v+" Per Serving";
+            o = o+" Per Serving";
+        } else {
+            n = n+" Per "+serving;
+            m = m+" Per "+serving;
+            v = v+" Per "+serving;
+            o = o+" Per "+serving;
+        }
+
+        if(!TextUtils.isEmpty(content) && !TextUtils.isEmpty(unit)){
+            n = n+" ("+content+" "+unit+")";
+            m = m+" ("+content+" "+unit+")";
+            v = v+" ("+content+" "+unit+")";
+            o = o+" ("+content+" "+unit+")";
+        } else {
+
+        }
+
+        nutri.setText(n);
+        min.setText(m);
+        vit.setText(v);
+        oth.setText(o);
     }
 
     private void handleUnitClick() {
@@ -197,6 +362,7 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                         setFoodItemValue(til_unit, text);
+                        updateFoodContentHeaders();
                         return true;
                     }
                 })
@@ -237,29 +403,15 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
     }
 
     private void handleSubmitClick() {
-
-        int pageIndex = pager.getCurrentItem();
-
-        if (pageIndex == 0) {
-            if (isValidated(pageIndex)) {
-                pager.setCurrentItem(1, true);
-                fabB.setImageResource(R.drawable.ic_arrow_forward);
+            if(mode == VIEW) {
+                changeMode(EDIT);
                 return;
             }
-        } else if (pageIndex == 1) {
-            if (isValidated(pageIndex)) {
-                pager.setCurrentItem(2, true);
-                fabB.setImageResource(R.drawable.ic_check);
-                return;
-            }
-        } else if (pageIndex == 2) {
-
-
-            if (!isValidated(pageIndex)) {
+            if (!isValidated()) {
                 return;
             }
 
-            Food food = new Food();
+            Food food = getFood();
 
             food.setName(til_name.getEditText().getText().toString());
             food.setDesc(til_desc.getEditText().getText().toString());
@@ -267,14 +419,14 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
             food.setCategory(FoodCategory.getIdByName(til_category.getEditText().getText().toString()));
             food.setCategory(FoodCategory.getIdByName(til_category.getEditText().getText().toString()));
 
-            String prefRoutines = til_pref_routines.getEditText().getText().toString();
+/*            String prefRoutines = til_pref_routines.getEditText().getText().toString();
             String[] routines = prefRoutines.split(",");
             List<Integer> pRoutines = new ArrayList<>();
             for (String routine : routines) {
                 int id = Routines.getIdByName(routine);
                 pRoutines.add(id);
             }
-            food.setPrefRoutine(pRoutines);
+            food.setPrefRoutine(pRoutines);*/
 
 
             food.setServingId(Servings.getIdByName(til_serving.getEditText().getText().toString()));
@@ -334,13 +486,15 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
                 food.setSugar(Float.parseFloat(til_sugar.getEditText().getText().toString()));
 
             food.setBitmap(foodBitmap);
+            if(TextUtils.isEmpty(food.getCreator()))
+            food.setCreator(LoginUtils.getUserCredential());
             CreateFoodUseCase usecase = (CreateFoodUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_FOOD);
             usecase.execute(this, food, true);
-        }
+
     }
 
-    private boolean isValidated(int pageIndex) {
-        if (pageIndex == 0) {
+    private boolean isValidated() {
+
             if (TextUtils.isEmpty(til_name.getEditText().getText())) {
                 Toast.makeText(this, "Please enter food name", Toast.LENGTH_SHORT).show();
                 return false;
@@ -357,12 +511,11 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
                 Toast.makeText(this, "Please select food category", Toast.LENGTH_SHORT).show();
                 return false;
             }
-            if (TextUtils.isEmpty(til_pref_routines.getEditText().getText())) {
+            /*if (TextUtils.isEmpty(til_pref_routines.getEditText().getText())) {
                 Toast.makeText(this, "Please select preferred routines", Toast.LENGTH_SHORT).show();
                 return false;
-            }
-            return true;
-        } else if (pageIndex == 1) {
+            }*/
+
             if (TextUtils.isEmpty(til_serving.getEditText().getText())) {
                 Toast.makeText(this, "Please select food serving", Toast.LENGTH_SHORT).show();
                 return false;
@@ -375,8 +528,7 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
                 Toast.makeText(this, "Please select content per serving", Toast.LENGTH_SHORT).show();
                 return false;
             }
-            return true;
-        } else if (pageIndex == 2) {
+
             if (TextUtils.isEmpty(til_calory.getEditText().getText())) {
                 Toast.makeText(this, "Please enter calory", Toast.LENGTH_SHORT).show();
                 return false;
@@ -395,16 +547,15 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
                 return false;
             }
             return true;
-        }
-        return false;
     }
 
-    public static Intent getCallingIntent(Activity context, int mealId) {
+
+    public static Intent getCallingIntent(Activity context, long mealId, long foodId,LaunchMode mode) {
         Intent i = new Intent(context, CreateFoodActivity.class);
-
         i.putExtra("mealId", mealId);
+        i.putExtra("foodId", foodId);
+        i.putExtra("mode", mode.code);
         return i;
-
     }
 
     @Override
@@ -413,88 +564,144 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
     }
 
     @Override
-    public void onFoodCreated(Food food) {
-        Intent i = new Intent();
-        food.setBitmap(null);
-        i.putExtra("foodId", food.getUid());
-        i.putExtra("food", Parcels.wrap(food));
-        setResult(RESULT_OK, i);
-        finish();
+    public void onBlobFetched(String blobKey, Bitmap bitmap) {
+        if(bitmap != null)
+            iv_food.setImageBitmap(bitmap);
     }
 
     @Override
-    public void onPageCreated(ViewGroup view, int position) {
+    public void onFoodListFetched(List<Food> foods, String searchKey) {
+        setFood(foods.get(0));
+        loadUIwithFood();
+    }
 
-        if (position == 0) {
-            til_name = (TextInputLayout) view.findViewById(R.id.til_food_name);
-            til_desc = (TextInputLayout) view.findViewById(R.id.til_food_desc);
-            til_type = (TextInputLayout) view.findViewById(R.id.til_food_type);
-            til_category = (TextInputLayout) view.findViewById(R.id.til_food_category);
-            til_pref_routines = (TextInputLayout) view.findViewById(R.id.til_food_pref_routines);
+    private void loadUIwithFood() {
+            loadFoodImage();
 
-            til_type.getEditText().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    handleTypeClick();
-                }
-            });
+            til_name.getEditText().setText(getFood().getName());
+            til_desc.getEditText().setText(getFood().getDesc());
+            til_type.getEditText().setText(FoodType.getById(getFood().getType()).lable);
+            til_category.getEditText().setText(FoodCategory.getById(getFood().getCategory()).lable);
 
-            til_category.getEditText().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    handleCategoryClick();
-                }
-            });
-            til_pref_routines.getEditText().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    handlePrefRoutineClick();
-                }
-            });
-        } else if (position == 1) {
-            til_serving = (TextInputLayout) view.findViewById(R.id.til_food_serving);
-            til_unit = (TextInputLayout) view.findViewById(R.id.til_food_unit);
-            til_content = (TextInputLayout) view.findViewById(R.id.til_food_content);
+            til_serving.getEditText().setText(Servings.getById(getFood().getServingId()).lable);
+            til_content.getEditText().setText("" + getFood().getContentPerServing());
+            til_unit.getEditText().setText(Units.getById(getFood().getUnitId()).lable);
 
-            til_serving.getEditText().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    handleServingClick();
-                }
-            });
+            til_calory.getEditText().setText("" + getFood().getCalory());
+            til_fat.getEditText().setText("" + getFood().getFat());
+            til_protine.getEditText().setText("" + getFood().getProtine());
+            til_carbs.getEditText().setText("" + getFood().getCarbs());
+            til_fiber.getEditText().setText("" + getFood().getFiber());
 
-            til_unit.getEditText().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    handleUnitClick();
-                }
-            });
-        } else if (position == 2) {
-            til_calory = (TextInputLayout) view.findViewById(R.id.til_food_calory);
-            til_fat = (TextInputLayout) view.findViewById(R.id.til_food_fat);
-            til_protine = (TextInputLayout) view.findViewById(R.id.til_food_protine);
-            til_carbs = (TextInputLayout) view.findViewById(R.id.til_food_carbs);
-            til_fiber = (TextInputLayout) view.findViewById(R.id.til_food_fiber);
+            til_calcium.getEditText().setText("" + getFood().getCalcium());
+            til_sodium.getEditText().setText("" + getFood().getSodium());
+            til_potassium.getEditText().setText("" + getFood().getPotassium());
+            til_iron.getEditText().setText("" + getFood().getIron());
+            til_zinc.getEditText().setText("" + getFood().getZinc());
+            til_magnisium.getEditText().setText("" + getFood().getMagnissium());
 
-            til_calcium = (TextInputLayout) view.findViewById(R.id.til_food_calcium);
-            til_sodium = (TextInputLayout) view.findViewById(R.id.til_food_sodium);
-            til_potassium = (TextInputLayout) view.findViewById(R.id.til_food_potassium);
-            til_iron = (TextInputLayout) view.findViewById(R.id.til_food_iron);
-            til_zinc = (TextInputLayout) view.findViewById(R.id.til_food_zinc);
-            til_magnisium = (TextInputLayout) view.findViewById(R.id.til_food_magnisium);
+            til_vitaminA.getEditText().setText("" + getFood().getVitaminA());
+            til_vitaminB.getEditText().setText("" + getFood().getVitaminB());
+            til_vitaminC.getEditText().setText("" + getFood().getVitaminC());
+            til_vitaminD.getEditText().setText("" + getFood().getVitaminD());
+            til_vitaminE.getEditText().setText("" + getFood().getVitaminE());
+            til_vitaminK.getEditText().setText("" + getFood().getVitaminK());
 
-            til_vitaminA = (TextInputLayout) view.findViewById(R.id.til_food_vitaminA);
-            til_vitaminB = (TextInputLayout) view.findViewById(R.id.til_food_vitaminB12);
-            til_vitaminC = (TextInputLayout) view.findViewById(R.id.til_food_vitaminC);
-            til_vitaminD = (TextInputLayout) view.findViewById(R.id.til_food_vitaminD);
-            til_vitaminE = (TextInputLayout) view.findViewById(R.id.til_food_vitaminE);
-            til_vitaminK = (TextInputLayout) view.findViewById(R.id.til_food_vitaminK);
+            til_cholestrol.getEditText().setText("" + getFood().getCholestrol());
+            til_sugar.getEditText().setText("" + getFood().getSugar());
 
-            til_cholestrol = (TextInputLayout) view.findViewById(R.id.til_food_cholestrol);
-            til_sugar = (TextInputLayout) view.findViewById(R.id.til_food_sugar);
+        updateFoodContentHeaders();
+        //fetchFoodWithIds(CommonUtils.getLongArrayFromList(getMeal().getFoodIds()));
+
+    }
+
+    private void loadFoodImage() {
+        FetchBlobUseCase usecase = (FetchBlobUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_BLOB);
+        usecase.execute(this,false,getFood().getBlobKey(),getFood().getBlobServingUrl());
+    }
+
+    public void setFood(Food food) {
+        this.food = food;
+        collapsingToolBar.setTitle(food.getName());
+    }
+
+    public Food getFood() {
+        if(food == null){
+            food = new Food();
+        }
+        return food;
+    }
+    @Override
+    public void onFoodCreated(Food food) {
+
+        if (food != null && mode == CREATE) {
+            foodId = food.getUid();
+            Intent i = new Intent();
+            i.putExtra("foodId", food.getUid());
+            food.setBitmap(null);
+            i.putExtra("food", Parcels.wrap(food));
+            i.putExtra("mealId", mealId);
+            setResult(RESULT_OK, i);
+            finish();
+        } else if (food != null && mode == EDIT) {
+            changeMode(LaunchMode.VIEW);
+            setFood(food);
+            loadUIwithFood();
+        }
+    }
+
+    private void changeMode(LaunchMode mode) {
+        this.mode = mode;
+        if(mode == VIEW){
+            fabB.setImageResource(R.drawable.ic_mode_edit);
+            updateEditability(false);
+        } else if(mode == EDIT){
+            fabB.setImageResource(R.drawable.ic_check);
+            updateEditability(true);
+        } else if(mode == CREATE) {
+            fabB.setImageResource(R.drawable.ic_check);
+            updateEditability(true);
         }
 
     }
+
+    private void updateEditability(boolean isEditable) {
+            if(til_name == null) return;
+            til_name.getEditText().setEnabled(isEditable);
+            til_desc.getEditText().setEnabled(isEditable);
+            til_type.getEditText().setEnabled(isEditable);
+            til_category.getEditText().setEnabled(isEditable);
+            iv_food.setClickable(isEditable);
+            if(til_serving == null) return;
+            til_serving.getEditText().setEnabled(isEditable);
+            til_content.getEditText().setEnabled(isEditable);
+            til_unit.getEditText().setEnabled(isEditable);
+            if(til_calory == null) return;
+            til_calory.getEditText().setEnabled(isEditable);
+            til_protine.getEditText().setEnabled(isEditable);
+            til_fiber.getEditText().setEnabled(isEditable);
+            til_fat.getEditText().setEnabled(isEditable);
+            til_carbs.getEditText().setEnabled(isEditable);
+
+            til_calcium.getEditText().setEnabled(isEditable);
+            til_potassium.getEditText().setEnabled(isEditable);
+            til_magnisium.getEditText().setEnabled(isEditable);
+            til_iron.getEditText().setEnabled(isEditable);
+            til_zinc.getEditText().setEnabled(isEditable);
+            til_sodium.getEditText().setEnabled(isEditable);
+
+            til_vitaminA.getEditText().setEnabled(isEditable);
+            til_vitaminB.getEditText().setEnabled(isEditable);
+            til_vitaminC.getEditText().setEnabled(isEditable);
+            til_vitaminD.getEditText().setEnabled(isEditable);
+            til_vitaminE.getEditText().setEnabled(isEditable);
+            til_vitaminK.getEditText().setEnabled(isEditable);
+
+            til_sugar.getEditText().setEnabled(isEditable);
+            til_cholestrol.getEditText().setEnabled(isEditable);
+
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -518,4 +725,5 @@ public class CreateFoodActivity extends AppCompatActivity implements CreateFoodU
             }
         }
     }
+
 }

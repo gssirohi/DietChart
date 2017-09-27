@@ -20,4 +20,6 @@ public class Key {
     public static final int CREATE_FOOD = 16;
     public static final int GET_FROM_GALLERY = 17;
     public static final int VIEW_MEAL = 18;
+    public static final int LOGIN = 19;
+    public static final int VIEW_FOOD = 20;
 }

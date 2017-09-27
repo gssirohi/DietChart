@@ -17,7 +17,9 @@
                 com.techticz.dietchart.backend.endpoints.FoodEntityEndpoint,
                 com.techticz.dietchart.backend.endpoints.BlobEndPoint,
                 com.techticz.dietchart.backend.endpoints.MealEntityEndpoint,
-                com.techticz.dietchart.backend.endpoints.MealPlanEntityItemEndpoint</param-value>
+                com.techticz.dietchart.backend.endpoints.MealPlanEntityItemEndpoint,
+                com.techticz.dietchart.backend.endpoints.AppUserEndpoint,
+                </param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

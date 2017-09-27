@@ -7,7 +7,9 @@ public enum AppErrors {
     TRIP_NULL(0, "TRIP_NUll", "Couldn't fetch trip from response"),
     RESPONSE_NULL(1, "RESPONSE_NUll", "No response from server"),
     TRIP_CREATE_ERROR(2, "TRIP_CREATE_ERROR", "No response from server"),
-    PRODUCT_LIST_NULL(3, "PRODUCT_LIST_NULL", "Could not retrive list from response");
+    PRODUCT_LIST_NULL(3, "PRODUCT_LIST_NULL", "Could not retrive list from response"),
+    REPOSITORY(4,"REPOSITORY" , "Error while accessing repository"),
+    PARSE_ERROR(5,"PARSE_ERROR" ,"Parsing failed");
 
 
     String name;

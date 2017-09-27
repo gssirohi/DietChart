@@ -2,23 +2,17 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
-import com.google.api.client.util.IOUtils;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.constant.Repositories;
-import com.techticz.app.domain.exception.AppRepositoryException;
-import com.techticz.app.domain.model.pojo.Meal;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.domain.repository.cache.CacheRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
 import com.techticz.app.utility.AppLogger;
-import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 
 /**
@@ -70,7 +64,7 @@ public class FetchBlobInteractor extends BaseInteractor implements FetchBlobUseC
 
             }
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetching blob "+blobKey);
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {

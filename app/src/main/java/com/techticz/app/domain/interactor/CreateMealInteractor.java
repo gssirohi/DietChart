@@ -3,13 +3,16 @@ package com.techticz.app.domain.interactor;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.base.AppCore;
+import com.techticz.app.constant.Repositories;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
 import com.techticz.app.utility.AppLogger;
+import com.techticz.app.utility.AppUtils;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
 
 /**
@@ -31,23 +34,27 @@ public class CreateMealInteractor extends BaseInteractor implements CreateMealUs
     public void run() {
 
         try {
-            Thread.sleep(300);
             final long mealId;
+
+            IAppRepository db = AppCore.getInstance().getProvider().getAppRepository(Repositories.DATABASE);
             if(meal.getUid() != null && meal.getUid() != 0 ) {
                 if(TextUtils.isEmpty(meal.getBlobServingUrl())){
-                    ImageUploadResponse blob = appRepository.uploadImage(this, meal.getBitmap(), meal.getName().trim());
+                    ImageUploadResponse blob = appRepository.uploadImage(this, meal.getBitmap(), AppUtils.getBitmapName(meal));
                     meal.setBlobServingUrl(blob.getServingUrl());
                     meal.setBlobKey(blob.getBlobKey());
                     AppLogger.i(this,"BLOB KEY:"+meal.getBlobKey());
                 }
+                db.updateMeal(this,meal);
                 mealId = appRepository.updateMeal(this,meal);
             } else {
                 mealId = appRepository.createMeal(this, meal);
                 meal.setUid(mealId);
-                ImageUploadResponse blob = appRepository.uploadImage(this, meal.getBitmap(), meal.getName().trim());
+                db.createMeal(this,meal);
+                ImageUploadResponse blob = appRepository.uploadImage(this, meal.getBitmap(), AppUtils.getBitmapName(meal));
                 meal.setBlobServingUrl(blob.getServingUrl());
                 meal.setBlobKey(blob.getBlobKey());
                 AppLogger.i(this,"BLOB KEY:"+meal.getBlobKey());
+                db.updateMeal(this,meal);
                 appRepository.updateMeal(this,meal);
             }
 
@@ -60,7 +67,7 @@ public class CreateMealInteractor extends BaseInteractor implements CreateMealUs
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on create meal");
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
@@ -69,8 +76,6 @@ public class CreateMealInteractor extends BaseInteractor implements CreateMealUs
                         callback.onError(e.getError());
                     }
                 });
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 

@@ -6,11 +6,13 @@
     android:padding="4dp"
     android:background="@color/meal_item_bg"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <ImageView
+    <com.tecticz.powerkit.ui.customview.RoundImageView
+        android:id="@+id/iv_meal"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/app_icon"/>
+        android:src="@drawable/app_icon"
+        />
     <LinearLayout
         android:layout_width="wrap_content"
         android:orientation="vertical"
@@ -32,6 +34,16 @@
         android:text="Meal type"
         android:layout_marginTop="4dp"
         style="@style/Text.Light"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_details"
+            android:hint="Explore"
+            android:text="Explore"
+            android:gravity="end"
+            android:layout_gravity="end"
+            android:layout_marginTop="4dp"
+            style="@style/TextAction"/>
     </LinearLayout>
 
     <View
@@ -51,10 +63,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="280"
+            android:text="NA"
             style="@style/Text.Light.VeryLarge.Bold"
             android:layout_gravity="end"
-            android:textColor="@color/highlighted_text_color"
+            android:textColor="@color/colorAccent"
             android:id="@+id/tv_calories"
             />
         <TextView

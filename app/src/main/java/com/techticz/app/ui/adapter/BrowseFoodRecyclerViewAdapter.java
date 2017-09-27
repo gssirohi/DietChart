@@ -3,7 +3,10 @@ package com.techticz.app.ui.adapter;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.techticz.app.R;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.ui.customview.FoodListItemView;
 import com.techticz.app.ui.customview.MealListItemView;
@@ -40,6 +43,8 @@ public class BrowseFoodRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         if (holder instanceof DataViewHolder) {
             // holder.mItem = mValues.get(position);
             ((DataViewHolder) holder).mView.fillDetails(mValues.get(position));
+            ((TextView)((DataViewHolder) holder).mView.findViewById(R.id.tv_serving_label)).setText("Calories");
+            ((EditText)((DataViewHolder) holder).mView.findViewById(R.id.et_serving)).setText(""+mValues.get(position).getCalory());
             ((DataViewHolder) holder).mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

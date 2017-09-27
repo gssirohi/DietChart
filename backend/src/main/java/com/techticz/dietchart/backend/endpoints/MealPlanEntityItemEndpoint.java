@@ -9,14 +9,19 @@ import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterator;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.cmd.Query;
+import com.techticz.dietchart.backend.entities.MealEntity;
 import com.techticz.dietchart.backend.entities.MealPlanEntityItem;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
+
+import ch.boye.httpclientandroidlib.util.TextUtils;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
@@ -32,8 +37,8 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
         version = "v1",
         resource = "mealPlanEntityItem",
         namespace = @ApiNamespace(
-                ownerDomain = "entities.backend.dietchart.techticz.com",
-                ownerName = "entities.backend.dietchart.techticz.com",
+                ownerDomain = "backend.dietchart.techticz.com",
+                ownerName = "backend.dietchart.techticz.com",
                 packagePath = ""
         )
 )
@@ -75,16 +80,138 @@ public class MealPlanEntityItemEndpoint {
             name = "insert",
             path = "mealPlanEntityItem",
             httpMethod = ApiMethod.HttpMethod.POST)
-    public MealPlanEntityItem insert(MealPlanEntityItem mealPlanEntityItem) {
+    public MealPlanEntityItem insert(MealPlanEntityItem mealPlanEntityItem,@Named("autoLoad") Boolean autoLoad,@Named("prefRoutines") List<Integer> prefRoutines) {
         // Typically in a RESTful API a POST does not have a known ID (assuming the ID is used in the resource path).
         // You should validate that mealPlanEntityItem.uid has not been set. If the ID type is not supported by the
         // Objectify ID generator, e.g. long or String, then you should generate the unique ID yourself prior to saving.
         //
         // If your client provides the ID then you should probably use PUT instead.
+        if(autoLoad) {
+            loadWithMeals(mealPlanEntityItem,prefRoutines);
+        }
         ofy().save().entity(mealPlanEntityItem).now();
         logger.info("Created MealPlanEntityItem with ID: " + mealPlanEntityItem.getUid());
 
         return ofy().load().entity(mealPlanEntityItem).now();
+    }
+
+    private void loadWithMeals(MealPlanEntityItem mealPlan, List<Integer> prefRoutines) {
+        float targetCalory = mealPlan.getDailyCalory();
+        float[] dtc = getDistributedTargetCalories(targetCalory,prefRoutines);
+        List<List<MealEntity>> inventry = loadInventryForRoutines(prefRoutines);
+
+
+            String loadedDayMeals = "0:0:0:0:0:0:0";
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getMondayMeals(),dtc,inventry);
+                    mealPlan.setMondayMeals(loadedDayMeals);
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getTuesdayMeals(),dtc,inventry);
+                    mealPlan.setTuesdayMeals(loadedDayMeals);
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getWednesdayMeals(),dtc,inventry);
+                    mealPlan.setWednesdayMeals(loadedDayMeals);
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getThursdayMeals(),dtc,inventry);
+                    mealPlan.setThursdayMeals(loadedDayMeals);
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getFridayMeals(),dtc,inventry);
+                    mealPlan.setFridayMeals(loadedDayMeals);
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getSaturdayMeals(),dtc,inventry);
+                    mealPlan.setSaturdayMeals(loadedDayMeals);
+                    loadedDayMeals = getLoadedDayMeals(prefRoutines,mealPlan.getSundayMeals(),dtc,inventry);
+                    mealPlan.setSundayMeals(loadedDayMeals);
+
+
+
+    }
+
+    private String getLoadedDayMeals(List<Integer> prefRoutines, String meals, float[] dtc, List<List<MealEntity>> inventry) {
+        String[] mealIds = meals.split(":");
+        for(Integer rId : prefRoutines){
+            String id = mealIds[rId-1];
+            if(id.equalsIgnoreCase("0")){
+                // find out suitable meal for this routine matching calory target
+                float target = dtc[rId - 1];
+                MealEntity e = findSuitableMealFromInventry(target,inventry.get(rId-1));
+                if(e == null){
+                    //do nothing
+                } else {
+                    mealIds[rId - 1] = "" + e.getUid();
+                }
+            }
+        }
+       return getStringFromArray(mealIds);
+
+    }
+
+    private MealEntity findSuitableMealFromInventry(float target, List<MealEntity> meals) {
+        if(meals == null) return null;
+        //collect all the meals in the range and pick one randomly
+
+        List<MealEntity> inRange = new ArrayList<>();
+        for(MealEntity e:meals){
+            float c = e.extractNutritient().getCalory();
+            if(c >= target ){
+                if(c - 50 <= target){
+                    //in range
+                    inRange.add(e);
+                }
+            } else {
+                if(c + 50 >= target){
+                    //in range
+                    inRange.add(e);
+                }
+            }
+        }
+        if(inRange.size() == 0) return null;
+        int size = inRange.size();
+        //pick random
+        Random rand = new Random();
+        int  random = rand.nextInt(size);
+        return inRange.get(random);
+    }
+
+    private String getStringFromArray(String[] mealIds) {
+        String s = "";
+        for(int i = 0;i<mealIds.length;i++){
+            s = s+mealIds[i];
+            if(i < mealIds.length-1){
+                s = s+":";
+            }
+        }
+        return s;
+    }
+
+    private List<List<MealEntity>> loadInventryForRoutines(List<Integer> prefRoutines) {
+        List<List<MealEntity>> inventry = new ArrayList<>();
+        inventry.add(new ArrayList<MealEntity>());
+        inventry.add(new ArrayList<MealEntity>());
+        inventry.add(new ArrayList<MealEntity>());
+        inventry.add(new ArrayList<MealEntity>());
+        inventry.add(new ArrayList<MealEntity>());
+        inventry.add(new ArrayList<MealEntity>());
+        inventry.add(new ArrayList<MealEntity>());
+        MealEntityEndpoint endpoint = new MealEntityEndpoint();
+        for(Integer rID: prefRoutines){
+            String routineKey = "R"+rID;
+            Collection<MealEntity> result = endpoint.list(routineKey, null, null).getItems();
+            inventry.get(rID-1).addAll(result);
+        }
+        return inventry;
+    }
+
+    private float[] getDistributedTargetCalories(float targetCalory,List<Integer> prefRoutines) {
+        float[] dtc = new float[7];
+        if(prefRoutines == null) return dtc;
+        int[] percents = new int[]{10,20,20,10,10,20,10};
+        float totalDistributed = 100;
+        for(Integer rID: prefRoutines){
+            dtc[rID-1] = (percents[rID-1]*targetCalory)/100;
+            totalDistributed = totalDistributed + dtc[rID-1];
+        }
+        float caloryLeft = targetCalory - totalDistributed;
+
+        //equally distribute left calories
+        for(Integer rID: prefRoutines){
+            dtc[rID-1] = dtc[rID-1] + caloryLeft/prefRoutines.size();
+        }
+        return dtc;
     }
 
     /**
@@ -100,9 +227,12 @@ public class MealPlanEntityItemEndpoint {
             name = "update",
             path = "mealPlanEntityItem/{uid}",
             httpMethod = ApiMethod.HttpMethod.PUT)
-    public MealPlanEntityItem update(@Named("uid") Long uid, MealPlanEntityItem mealPlanEntityItem) throws NotFoundException {
+    public MealPlanEntityItem update(@Named("autoLoad") Boolean autoLoad,@Named("prefRoutines") List<Integer> prefRoutines,@Named("uid") Long uid, MealPlanEntityItem mealPlanEntityItem) throws NotFoundException {
         // TODO: You should validate your ID parameter against your resource's ID here.
         checkExists(uid);
+        if(autoLoad){
+            loadWithMeals(mealPlanEntityItem,prefRoutines);
+        }
         ofy().save().entity(mealPlanEntityItem).now();
         logger.info("Updated MealPlanEntityItem: " + mealPlanEntityItem);
         return ofy().load().entity(mealPlanEntityItem).now();
@@ -139,6 +269,49 @@ public class MealPlanEntityItemEndpoint {
     public CollectionResponse<MealPlanEntityItem> list(@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit) {
         limit = limit == null ? DEFAULT_LIST_LIMIT : limit;
         Query<MealPlanEntityItem> query = ofy().load().type(MealPlanEntityItem.class).limit(limit);
+        if (cursor != null) {
+            query = query.startAt(Cursor.fromWebSafeString(cursor));
+        }
+        QueryResultIterator<MealPlanEntityItem> queryIterator = query.iterator();
+        List<MealPlanEntityItem> mealPlanEntityItemList = new ArrayList<MealPlanEntityItem>(limit);
+        while (queryIterator.hasNext()) {
+            mealPlanEntityItemList.add(queryIterator.next());
+        }
+        return CollectionResponse.<MealPlanEntityItem>builder().setItems(mealPlanEntityItemList).setNextPageToken(queryIterator.getCursor().toWebSafeString()).build();
+    }
+
+    @ApiMethod(
+            name = "listRecommended",
+            path = "mealPlanEntityItem/recommended",
+            httpMethod = ApiMethod.HttpMethod.GET)
+    public CollectionResponse<MealPlanEntityItem> listRecommended(@Nullable @Named("cursor") String cursor, @Nullable @Named("limit") Integer limit) {
+        limit = limit == null ? DEFAULT_LIST_LIMIT : limit;
+        Query<MealPlanEntityItem> query = ofy().load().type(MealPlanEntityItem.class).limit(limit)
+                .filter("recommended",true);
+        if (cursor != null) {
+            query = query.startAt(Cursor.fromWebSafeString(cursor));
+        }
+        QueryResultIterator<MealPlanEntityItem> queryIterator = query.iterator();
+        List<MealPlanEntityItem> mealPlanEntityItemList = new ArrayList<MealPlanEntityItem>(limit);
+        while (queryIterator.hasNext()) {
+            mealPlanEntityItemList.add(queryIterator.next());
+        }
+        return CollectionResponse.<MealPlanEntityItem>builder().setItems(mealPlanEntityItemList).setNextPageToken(queryIterator.getCursor().toWebSafeString()).build();
+    }
+
+    @ApiMethod(
+            name = "listMyPlan",
+            path = "mealPlanEntityItem/myplans",
+            httpMethod = ApiMethod.HttpMethod.GET)
+    public CollectionResponse<MealPlanEntityItem> listMyPlan(@Nullable @Named("cursor") String cursor,@Nullable @Named("creater") String creater, @Nullable @Named("limit") Integer limit) {
+        limit = limit == null ? DEFAULT_LIST_LIMIT : limit;
+        Query<MealPlanEntityItem> query = null;
+        if(!TextUtils.isEmpty(creater))
+         query = ofy().load().type(MealPlanEntityItem.class).limit(limit)
+                .filter("creater",creater);
+        else
+            query = ofy().load().type(MealPlanEntityItem.class).limit(limit);
+
         if (cursor != null) {
             query = query.startAt(Cursor.fromWebSafeString(cursor));
         }

@@ -7,14 +7,12 @@ import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.techticz.app.domain.model.Model;
-import com.techticz.app.domain.model.ProductModel;
 
 import static com.techticz.app.domain.model.pojo.MealRoutineWeekInfo.TableName;
 
 
 @Entity(tableName = TableName)
-public class MealRoutineWeekInfo extends Model {
+public class MealRoutineWeekInfo {
 
     public final static String TableName = "meal_routine_week";
 

@@ -12,7 +12,7 @@ import com.techticz.app.domain.model.Model;
 import com.techticz.app.domain.model.ProductModel;
 
 @Entity(tableName = "nutrition")
-public class Nutrition extends Model {
+public class Nutrition  {
 
     @SerializedName("uid")
     @Expose

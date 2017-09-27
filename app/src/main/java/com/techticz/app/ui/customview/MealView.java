@@ -20,14 +20,20 @@ import com.techticz.app.constant.FoodType;
 import com.techticz.app.constant.UseCases;
 import com.techticz.app.domain.interactor.FetchBlobUseCase;
 import com.techticz.app.domain.interactor.FetchImageInteractor;
+import com.techticz.app.domain.interactor.IExtractNutritientUseCase;
 import com.techticz.app.domain.interactor.LoadImageUseCase;
+import com.techticz.app.domain.model.pojo.AddedFood;
+import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Meal;
+import com.techticz.app.domain.model.pojo.NutitionInfo;
 import com.techticz.app.domain.model.pojo.Nutrition;
 
+import com.techticz.app.ui.activity.DailyRoutineActivity;
 import com.techticz.app.ui.viewmodel.contract.IMealRoutineViewModel;
 import com.techticz.app.ui.viewmodel.contract.IMealViewModel;
 import com.techticz.app.utility.AppNavigator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -37,7 +43,7 @@ import static android.content.Context.MODE_PRIVATE;
  * TODO: document your custom view class.
  */
 
-public class MealView extends FrameLayout implements FetchBlobUseCase.Callback {
+public class MealView extends FrameLayout implements FetchBlobUseCase.Callback, IExtractNutritientUseCase.Callback {
     private Meal viewModel;
     private FetchImageInteractor interactor;
     private ImageView imageView;
@@ -62,26 +68,17 @@ public class MealView extends FrameLayout implements FetchBlobUseCase.Callback {
 
     public void fillDetails(Meal viewModel) {
         this.viewModel = viewModel;
+
         TextView name = (TextView) findViewById(R.id.tv_meal_name);
         TextView desc = (TextView) findViewById(R.id.tv_meal_desc);
         TextView type = (TextView) findViewById(R.id.tv_meal_type);
         TextView explore = (TextView) findViewById(R.id.tv_meal_explore);
 
-        TextView tv_nutri_label_1 = (TextView) findViewById(R.id.tv_nutri_label_1);
-        TextView tv_nutri_label_2 = (TextView) findViewById(R.id.tv_nutri_label_2);
-        TextView tv_nutri_label_3 = (TextView) findViewById(R.id.tv_nutri_label_3);
-        TextView tv_nutri_label_4 = (TextView) findViewById(R.id.tv_nutri_label_4);
-
-        TextView tv_nutri_1 = (TextView) findViewById(R.id.tv_nutri_1);
-        TextView tv_nutri_2 = (TextView) findViewById(R.id.tv_nutri_2);
-        TextView tv_nutri_3 = (TextView) findViewById(R.id.tv_nutri_3);
-        TextView tv_nutri_4 = (TextView) findViewById(R.id.tv_nutri_4);
-
         imageView = (ImageView) findViewById(R.id.iv_meal_image);
 
         name.setText(viewModel.getName());
         desc.setText(viewModel.getDesc());
-        type.setText(FoodType.getById(viewModel.getType()).lable);
+//        type.setText(FoodType.getById(viewModel.getType()).lable);
 
         explore.setOnClickListener(new OnClickListener() {
             @Override
@@ -89,29 +86,48 @@ public class MealView extends FrameLayout implements FetchBlobUseCase.Callback {
                 handleExploreClick();
             }
         });
-/*
-        String url = viewModel.getImageUrl();
-        imageView.setVisibility(View.GONE);
-        progress.setVisibility(View.VISIBLE);
-        if (interactor != null)
-            interactor.setCancelled(true);//discard previous results since you have new  imageUyrl
-        interactor = (FetchImageInteractor) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.FETCH_PRODUCT_IMAGE);
-        interactor.execute(new LoadImageUseCase.Callback() {
-            @Override
-            public void onError(AppErrors error) {
-
-            }
-
-            @Override
-            public void onImage(Bitmap image) {
-                imageView.setImageBitmap(image);
-                imageView.setVisibility(View.VISIBLE);
-                progress.setVisibility(View.GONE);
-            }
-        }, url, false);*/
-
+        calculateMealNutritions();
      loadMealImage();
     }
+
+    private void calculateMealNutritions() {
+        IExtractNutritientUseCase usecase = (IExtractNutritientUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.CALCULATE_NUTRI);
+        usecase.execute(this,false,viewModel,null,null);
+    }
+
+    private void updateMealNutritionInfo(NutitionInfo totalN) {
+        LinearLayout ll = (LinearLayout)findViewById(R.id.ll_nutritient_view_container);
+        List<Nutri> nutriList = new ArrayList<>();
+        nutriList.add(new Nutri("Calory",totalN.getCalory()));
+        nutriList.add(new Nutri("Carbs",totalN.getCarbs()));
+        nutriList.add(new Nutri("Fat",totalN.getFat()));
+        nutriList.add(new Nutri("Protine",totalN.getProtine()));
+       // nutriList.add(new Nutri("Fiber",totalN.getFiber()));
+        ViewGroup f1 = (ViewGroup) ll.findViewById(R.id.label_value_calory);
+        ViewGroup f2 = (ViewGroup) ll.findViewById(R.id.label_value_carbs);
+        ViewGroup f3 = (ViewGroup) ll.findViewById(R.id.label_value_fat);
+        ViewGroup f4 = (ViewGroup) ll.findViewById(R.id.label_value_protine);
+        List<ViewGroup> ff = new ArrayList<>();
+        ff.add(0,f1);ff.add(1,f2);ff.add(2,f3);ff.add(3,f4);
+        int i = 0;
+        for(Nutri n: nutriList){
+            ((TextView)(ff.get(i).findViewById(R.id.tv_label))).setText(n.label);
+            ((TextView)(ff.get(i).findViewById(R.id.tv_value))).setText(""+n.value);
+            i++;
+        }
+    }
+
+    public class Nutri{
+        String label;
+        float value;
+        String unit;
+
+        public Nutri(String label, float value) {
+            this.label = label;
+            this.value = value;
+        }
+    }
+
     private void loadMealImage() {
         if(mealBitmap == null) {
             FetchBlobUseCase usecase = (FetchBlobUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.FETCH_BLOB);
@@ -135,6 +151,11 @@ public class MealView extends FrameLayout implements FetchBlobUseCase.Callback {
     @Override
     public void onError(AppErrors error) {
 
+    }
+
+    @Override
+    public void onNutritionFetched(NutitionInfo meal, NutitionInfo dayMeals, NutitionInfo plan) {
+        updateMealNutritionInfo(meal);
     }
 
     @Override

@@ -3,8 +3,10 @@ package com.techticz.app.domain.model.pojo;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
+import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -29,105 +31,28 @@ public class MealPlan extends Model {
     public MealPlan() {
     }
 
-    @SerializedName("uid")
-    @Expose
-    @PrimaryKey(autoGenerate = true)
-     Long uid;
-
-    @SerializedName("name")
-    @Expose
-    @ColumnInfo(name = "name")
-     String name;
-
-    @SerializedName("desc")
-    @Expose
-    @ColumnInfo(name = "desc")
-     String desc;
-
-    String blobServingUrl;
-
-    @SerializedName("healthGoal")
-    @Expose
-    @ColumnInfo(name = "healthGoal")
      int healthGoal;
-
-    @SerializedName("creater")
-    @Expose
-    @ColumnInfo(name = "creater")
-     String creater;
-
-    @SerializedName("dailycalory")
-    @Expose
-    @ColumnInfo(name = "dailycalory")
      float dailyCalory;
 
-    @SerializedName("mondayMeals")
-    @Expose
     DayMeals mondayMeals = new DayMeals();
 
-    @SerializedName("tuesdayMeals")
-    @Expose
      DayMeals tuesdayMeals = new DayMeals();
 
-    @SerializedName("wednesdayMeals")
-    @Expose
      DayMeals wednesdayMeals = new DayMeals();
 
-    @SerializedName("thursdayMeals")
-    @Expose
      DayMeals thursdayMeals = new DayMeals();
-
-    @SerializedName("fridayMeals")
-    @Expose
 
      DayMeals fridayMeals = new DayMeals();
 
-    @SerializedName("saturdayMeals")
-    @Expose
-
      DayMeals saturdayMeals = new DayMeals();
-
-    @SerializedName("sundayMeals")
-    @Expose
 
      DayMeals sundayMeals = new DayMeals();
 
-
-    public String getBlobServingUrl() {
-        return blobServingUrl;
-    }
-
-    public void setBlobServingUrl(String blobServingUrl) {
-        this.blobServingUrl = blobServingUrl;
-    }
 
     public static String getTableName() {
         return TableName;
     }
 
-    public Long getUid() {
-        return uid;
-    }
-
-    public void setUid(Long uid) {
-        this.uid = uid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
 
     public float getDailyCalory() {
         return dailyCalory;
@@ -199,13 +124,5 @@ public class MealPlan extends Model {
 
     public void setHealthGoal(int healthGoal) {
         this.healthGoal = healthGoal;
-    }
-
-    public String getCreater() {
-        return creater;
-    }
-
-    public void setCreater(String creater) {
-        this.creater = creater;
     }
 }

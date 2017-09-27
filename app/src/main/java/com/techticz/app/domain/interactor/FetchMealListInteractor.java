@@ -2,7 +2,10 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.base.AppCore;
+import com.techticz.app.constant.Repositories;
+import com.techticz.app.domain.exception.AppException;
+import com.techticz.app.domain.model.pojo.AddedFood;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
@@ -11,6 +14,7 @@ import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
 import com.techticz.app.utility.AppLogger;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -34,9 +38,10 @@ public class FetchMealListInteractor extends BaseInteractor implements FetchMeal
     public void run() {
 
         try {
-            Thread.sleep(300);
-
             final List<Meal> meals = appRepository.getMealList(this,10, searchKey, mealIds);
+            for(Meal m: meals){
+                loadFoods(m);
+            }
             dismissDialog();
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
@@ -46,7 +51,7 @@ public class FetchMealListInteractor extends BaseInteractor implements FetchMeal
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch meals");
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
@@ -55,8 +60,20 @@ public class FetchMealListInteractor extends BaseInteractor implements FetchMeal
                         callback.onError(e.getError());
                     }
                 });
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        }
+    }
+
+    private void loadFoods(Meal meal) {
+        if(meal == null) return;
+        IAppRepository appRepository = AppCore.getInstance().getProvider().getAppRepository(Repositories.DATABASE);
+        List<AddedFood> list = meal.getAddedFoods();
+        if(list != null){
+            Iterator<AddedFood> it = list.iterator();
+            while (it.hasNext()){
+                AddedFood af = it.next();
+                List<Food> fss = appRepository.getFoodList(null, "", new Long[]{af.getFoodId()});
+                af.setFood(fss.get(0));
+            }
         }
     }
 

@@ -1,20 +1,15 @@
 
 package com.techticz.app.domain.model.pojo;
 
-import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.PrimaryKey;
-import android.graphics.Bitmap;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import com.techticz.app.domain.model.Model;
-import com.techticz.app.domain.model.ProductModel;
+
 
 import org.parceler.Parcel;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 @Entity(tableName = Meal.TableName)
@@ -22,94 +17,42 @@ import java.util.List;
 public class Meal extends Model {
 
     public final static String TableName = "meals";
+    boolean R1,R2,R3,R4,R5,R6,R7;
+
 
     public Meal() {
     }
 
-    @SerializedName("uid")
-    @Expose
-    @PrimaryKey(autoGenerate = true)
-     Long uid;
-
-
-    @SerializedName("name")
-    @Expose
-     String name;
-
-    @SerializedName("desc")
-    @Expose
-     String desc;
-
-    @SerializedName("type")
-    @Expose
-     Integer type;
-
-    @SerializedName("category")
-    @Expose
-     Integer category;
-
-    @SerializedName("prefRoutine")
-    @Expose
-     List<Integer> prefRoutine;
-
-    @SerializedName("addedFoods")
-    @Expose
      List<AddedFood> addedFoods;
 
-    @SerializedName("foodIds")
-    @Expose
      List<Long> foodIds;
-    @Ignore
-     Bitmap bitmap;
-     String blobServingUrl;
-     String blobKey;
-
-    public Long getUid() {
-        return uid;
-    }
-
-    public void setUid(Long uid) {
-        this.uid = uid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
-    public Integer getCategory() {
-        return category;
-    }
-
-    public void setCategory(Integer category) {
-        this.category = category;
-    }
 
     public List<Integer> getPrefRoutine() {
-        return prefRoutine;
+        List<Integer> list = new ArrayList<>();
+        if(isR1())list.add(1);
+        if(isR2())list.add(2);
+        if(isR3())list.add(3);
+        if(isR4())list.add(4);
+        if(isR5())list.add(5);
+        if(isR6())list.add(6);
+        if(isR7())list.add(7);
+        return list;
     }
 
     public void setPrefRoutine(List<Integer> prefRoutine) {
-        this.prefRoutine = prefRoutine;
+        if(prefRoutine != null){
+            for(Integer i: prefRoutine){
+                switch(i){
+                    case 1:setR1(true);break;
+                    case 2:setR2(true);break;
+                    case 3:setR3(true);break;
+                    case 4:setR4(true);break;
+                    case 5:setR5(true);break;
+                    case 6:setR6(true);break;
+                    case 7:setR7(true);break;
+                }
+            }
+        }
     }
 
     public List<Long> getFoodIds() {
@@ -120,30 +63,6 @@ public class Meal extends Model {
         this.foodIds = foodIds;
     }
 
-    public void setBitmap(Bitmap bitmap) {
-        this.bitmap = bitmap;
-    }
-
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
-    public void setBlobServingUrl(String blobServingUrl) {
-        this.blobServingUrl = blobServingUrl;
-    }
-
-    public String getBlobServingUrl() {
-        return blobServingUrl;
-    }
-
-    public void setBlobKey(String blobKey) {
-        this.blobKey = blobKey;
-    }
-
-    public String getBlobKey() {
-        return blobKey;
-    }
-
     public List<AddedFood> getAddedFoods() {
         if(addedFoods == null) addedFoods = new ArrayList<>();
         return addedFoods;
@@ -152,4 +71,71 @@ public class Meal extends Model {
     public void setAddedFoods(List<AddedFood> addedFoods) {
         this.addedFoods = addedFoods;
     }
+
+
+    public boolean isR1() {
+        return R1;
+    }
+
+    public void setR1(boolean r1) {
+        R1 = r1;
+    }
+
+    public boolean isR2() {
+        return R2;
+    }
+
+    public void setR2(boolean r2) {
+        R2 = r2;
+    }
+
+    public boolean isR3() {
+        return R3;
+    }
+
+    public void setR3(boolean r3) {
+        R3 = r3;
+    }
+
+    public boolean isR4() {
+        return R4;
+    }
+
+    public void setR4(boolean r4) {
+        R4 = r4;
+    }
+
+    public boolean isR5() {
+        return R5;
+    }
+
+    public void setR5(boolean r5) {
+        R5 = r5;
+    }
+
+    public boolean isR6() {
+        return R6;
+    }
+
+    public void setR6(boolean r6) {
+        R6 = r6;
+    }
+
+    public boolean isR7() {
+        return R7;
+    }
+
+    public void setR7(boolean r7) {
+        R7 = r7;
+    }
+
+    public void updateFoodServing(Long foodId, int serving) {
+        List<AddedFood> afs = getAddedFoods();
+        for(AddedFood af: afs){
+            if(af.getFoodId() == foodId){
+                af.setServing(serving);
+            }
+        }
+    }
+
 }

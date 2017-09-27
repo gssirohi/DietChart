@@ -2,9 +2,8 @@ package com.techticz.app.domain.interactor;
 
 import android.content.Context;
 
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.model.pojo.Food;
-import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
@@ -46,7 +45,7 @@ public class FetchFoodListInteractor extends BaseInteractor implements FetchFood
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch foods");
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {

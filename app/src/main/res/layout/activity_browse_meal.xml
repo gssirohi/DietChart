@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:hint="Enter meal name"
-            android:textColorHint="@color/hint_text_color_light"
+            style="@style/Text.Light.Medium"
             android:drawableRight="@drawable/ic_action_search"
             android:background="@android:color/transparent"
             android:id="@+id/et_search_box"

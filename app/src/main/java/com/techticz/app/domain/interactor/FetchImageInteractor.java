@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 
 import com.techticz.app.base.AppCore;
 import com.techticz.app.constant.Repositories;
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.domain.repository.cache.CacheRepository;
 import com.techticz.app.executor.BaseInteractor;
@@ -54,7 +54,7 @@ public class FetchImageInteractor extends BaseInteractor implements LoadImageUse
                 }
             });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetching image");
             getMainThreadExecutor().execute(new Runnable() {
                 @Override

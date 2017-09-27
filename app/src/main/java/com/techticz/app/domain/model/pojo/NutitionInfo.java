@@ -260,4 +260,54 @@ public class NutitionInfo {
         sugar = sugar+nf.getSugar();
         cholestrol = cholestrol+nf.getCholestrol();
     }
+
+    public void remove(NutitionInfo nf) {
+        calory = calory-nf.getCalory();
+        carbs = carbs-nf.getCarbs();
+        fat = fat-nf.getFat();
+        protine = protine-nf.getProtine();
+        fiber = fiber-nf.getFiber();
+
+        vitaminA = vitaminA-nf.getVitaminA();
+        vitaminB = vitaminB-nf.getVitaminB();
+        vitaminC  = vitaminC-nf.getVitaminC();
+        vitaminD = vitaminD-nf.getVitaminD();
+        vitaminE = vitaminE - nf.getVitaminE();
+        vitaminK = vitaminK- nf.getVitaminK();
+
+        calcium = calcium-nf.getCalcium();
+        potassium = potassium-nf.getPotassium();
+        magnissium = magnissium-nf.getMagnissium();
+        sodium = sodium-nf.getSodium();
+        zinc = zinc-nf.getZinc();
+        iron = iron-nf.getIron();
+
+        sugar = sugar+nf.getSugar();
+        cholestrol = cholestrol+nf.getCholestrol();
+    }
+    public void applyServing(int serving) {
+
+        calory = calory*serving;
+        carbs = carbs*serving;
+        fat = fat*serving;
+        protine = protine*serving;
+        fiber = fiber*serving;
+
+        vitaminA = vitaminA*serving;
+        vitaminB = vitaminB*serving;
+        vitaminC  = vitaminC*serving;
+        vitaminD = vitaminD*serving;
+        vitaminE = vitaminE *serving;
+        vitaminK = vitaminK*serving;
+
+        calcium = calcium*serving;
+        potassium = potassium*serving;
+        magnissium = magnissium*serving;
+        sodium = sodium*serving;
+        zinc = zinc*serving;
+        iron = iron*serving;
+
+        sugar = sugar*serving;
+        cholestrol = cholestrol*serving;
+    }
 }

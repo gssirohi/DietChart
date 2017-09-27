@@ -2,6 +2,12 @@ package com.techticz.app.utility;
 
 import com.techticz.app.constant.AppAPIMethods;
 import com.techticz.app.constant.Products;
+import com.techticz.app.domain.model.pojo.Food;
+import com.techticz.app.domain.model.pojo.Meal;
+import com.techticz.app.domain.model.pojo.MealPlan;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by gssirohi on 10/9/16.
@@ -71,5 +77,20 @@ public class AppUtils {
                 return "Sunday";
         }
         return "invalid_day";
+    }
+
+    public static String getTimeStamp() {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        return timeStamp;
+    }
+
+    public static String getBitmapName(MealPlan plan) {
+        return "plans/"+plan.getName().trim()+"_"+AppUtils.getTimeStamp();
+    }
+    public static String getBitmapName(Meal meal) {
+        return "meals/"+meal.getName().trim()+"_"+AppUtils.getTimeStamp();
+    }
+    public static String getBitmapName(Food food) {
+        return "foods/"+food.getName().trim()+"_"+AppUtils.getTimeStamp();
     }
 }

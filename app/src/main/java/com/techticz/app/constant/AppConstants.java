@@ -11,6 +11,7 @@ public class AppConstants {
     public static final String CLOUDINARY_CLOUD_NAME = "techticz";
     public static final String CLOUDINARY_API_KEY = "537624983958816";
     public static final String CLOUDINARY_API_SECRET = "R_rzXvhdyLfv7G-7y0ym5Zm2_ts";
+    public static final String SERVER_ROOT_URL = "https://diet-chart-app.appspot.com/_ah/api/";
 
     // url to point to can be changed based on build type
     public static String SUFFIX_URL = "/v1/public";

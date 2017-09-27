@@ -41,9 +41,11 @@ public interface MealPlanDao {
     @Query("SELECT * FROM " + MealPlan.TableName + " WHERE uid IN (:uid)")
     MealPlan getMealPlan(Long uid);
 
-    @Query("SELECT * FROM " + MealPlan.TableName + " WHERE creater LIKE :user")
+    @Query("SELECT * FROM " + MealPlan.TableName + " WHERE creator LIKE :user")
     List<MealPlan> getPlansByCreater(String user);
 
     @Query("SELECT * FROM " + MealPlan.TableName + " WHERE name LIKE :searchKey")
     List<MealPlan> getAllContains(String searchKey);
+    @Query("SELECT * FROM " + MealPlan.TableName + " WHERE recommended LIKE :recommended")
+    List<MealPlan> isRecommendedPlans(Boolean recommended);
 }

@@ -4,13 +4,12 @@ import android.content.Context;
 
 import com.techticz.app.base.AppCore;
 import com.techticz.app.constant.Repositories;
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.domain.exception.AppException;
 import com.techticz.app.domain.model.pojo.AddedFood;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.domain.repository.api.APIRepository;
-import com.techticz.app.domain.repository.cache.CacheRepository;
 import com.techticz.app.executor.BaseInteractor;
 import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
@@ -51,7 +50,7 @@ public class FetchMealDetailsInteractor extends BaseInteractor implements FetchM
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch meals");
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
@@ -71,8 +70,7 @@ public class FetchMealDetailsInteractor extends BaseInteractor implements FetchM
             Iterator<AddedFood> it = list.iterator();
             while (it.hasNext()){
                 AddedFood af = it.next();
-                APIRepository repo = (APIRepository) AppCore.getInstance().getProvider().getAppRepository(Repositories.API);
-                List<Food> fss = repo.getFoodList(this, "", new Long[]{af.getFoodId()});
+                List<Food> fss = appRepository.getFoodList(this, "", new Long[]{af.getFoodId()});
                 af.setFood(fss.get(0));
             }
         }

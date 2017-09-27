@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.techticz.app.domain.model.pojo.AddedFood;
 import com.techticz.app.domain.model.pojo.DayMeals;
+import com.techticz.app.domain.model.pojo.Food;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,6 +48,7 @@ public class Converters {
     @TypeConverter
     public static String listToString(List<Integer> list) {
         String str = "";
+        if(list == null || list.isEmpty()) return str;
         Iterator<Integer> it = list.iterator();
         while (it.hasNext()) {
             Integer num = it.next();
@@ -79,6 +81,7 @@ public class Converters {
     @TypeConverter
     public static String longListToString(List<Long> list) {
         String str = "";
+        if(list == null) return str;
         Iterator<Long> it = list.iterator();
         while (it.hasNext()) {
             Long num = it.next();
@@ -144,4 +147,15 @@ public class Converters {
         }
         return addedFoods;
     }
+
+    public static Long[] foodIdsFromAddedFood(List<AddedFood> afs) {
+        if(afs == null) return new Long[0];
+        Long[] ids = new Long[afs.size()];
+        int i = 0;
+        for(AddedFood af: afs){
+            ids[i++] = af.getFoodId();
+        }
+        return ids;
+    }
+
 }

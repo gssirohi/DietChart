@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,14 +16,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.dietchart.auth.utils.LoginUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.techticz.app.R;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.base.BaseActivity;
 import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.Key;
 import com.techticz.app.constant.UseCases;
-import com.techticz.app.domain.interactor.CreateMealPlanUseCase;
+import com.techticz.app.domain.interactor.MealPlanUseCase;
 import com.techticz.app.domain.interactor.FetchDayMealListInteractor;
 import com.techticz.app.domain.interactor.FetchDayMealListUseCase;
 import com.techticz.app.domain.interactor.GetMealPlanUseCase;
@@ -33,10 +39,11 @@ import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.domain.model.pojo.MealRoutine;
 import com.techticz.app.ui.customview.ProductCardView;
 import com.techticz.app.ui.fragment.DailyRoutineTabFragment;
+import com.techticz.app.ui.fragment.DayMealInfoFragment;
 import com.techticz.app.ui.fragment.ProductDetailsFragment;
 
-import com.techticz.app.ui.viewmodel.contract.IMealRoutineViewModel;
 import com.techticz.app.ui.viewmodel.contract.IProductViewModel;
+import com.tecticz.powerkit.ui.customview.RoundImageView;
 
 import org.parceler.Parcels;
 
@@ -45,9 +52,8 @@ import java.util.List;
 
 public class DailyRoutineActivity extends BaseActivity implements ProductCardView.ProductCardViewContract,
         GetMealPlanUseCase.Callback, FetchDayMealListUseCase.Callback,
-        CreateMealPlanUseCase.Callback, NavigationView.OnNavigationItemSelectedListener  {
+        MealPlanUseCase.Callback, NavigationView.OnNavigationItemSelectedListener  {
 
-    private List<Meal> meals = new ArrayList<>();
     private OnResult resultWatcher;
     private DailyRoutineTabFragment tabfrag;
     private Long mealPlanId;
@@ -73,8 +79,7 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                displayPlanInfoFragment();
             }
         });
 
@@ -86,8 +91,28 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        setUpNavigationDrawer(navigationView);
         mealPlanId = getIntent().getLongExtra("meal_plan_id", 0);
         fetchMealPlan();
+    }
+
+    private void displayPlanInfoFragment() {
+        DayMealInfoFragment.newInstance().show(getSupportFragmentManager(), "dialog");
+    }
+
+    private void setUpNavigationDrawer(NavigationView navigationView) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user == null) return;
+        ((RoundImageView)navigationView.getHeaderView(0).findViewById(R.id.riv_user_profile)).setUrl(user.getPhotoUrl().toString());
+        ((TextView)navigationView.getHeaderView(0).findViewById(R.id.tv_user_name)).setText(user.getDisplayName());
+        ((TextView)navigationView.getHeaderView(0).findViewById(R.id.tv_user_email)).setText(user.getEmail());
+        ((TextView)navigationView.getHeaderView(0).findViewById(R.id.tv_user_phone)).setText(user.getPhoneNumber());
+        navigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getNavigator().navigateToLoginActivity(DailyRoutineActivity.this);
+            }
+        });
     }
 
     public void fetchMealPlan() {
@@ -148,7 +173,7 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         usecase.execute(this, day, getDayMealIdsByDay(day), true);
     }
 
-    private DayMeals getDayMealIdsByDay(int day) {
+    public DayMeals getDayMealIdsByDay(int day) {
         if (mealPlan == null) return null;
         switch (day) {
             case 0:
@@ -193,21 +218,30 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
             Meal meal = null;
             if(mealParcel != null)
             {
-                 meal = Parcels.unwrap(mealParcel);
+               meal = Parcels.unwrap(mealParcel);
             }
             meals.setMealOnRoutine(routineId, mealId );
 
             if(meal == null) {
-                CreateMealPlanUseCase usecase = (CreateMealPlanUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_MEAL_PLAN);
-                usecase.execute(this, mealPlan, true);
+                syncMealPlan();
             } else {
+                getMealPlan().extractNutritions().add(meal.extractNutritions());
                 resultWatcher.updateMealInRoutine(day, routineId, meal);
-                CreateMealPlanUseCase usecase = (CreateMealPlanUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_MEAL_PLAN);
-                usecase.execute(this, mealPlan, true);
+                syncMealPlan();
             }
         }
     }
 
+    private void syncMealPlan() {
+        MealPlanUseCase usecase = (MealPlanUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_MEAL_PLAN);
+        usecase.updateMealPlan(this, getMealPlan(), true);
+    }
+
+    public void removeMealFromRoutine(int day, int routineId, Meal meal){
+        DayMeals dayMeals = getDayMealIdsByDay(day);
+        dayMeals.setMealOnRoutine(routineId,0l);
+        syncMealPlan();
+    }
 
     public int getCurrentActiveSection() {
         return tabfrag.getActiveSection();
@@ -220,7 +254,9 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
 
     @Override
     public void onMealPlanCreated(MealPlan planWithId) {
-       // tabfrag.loadRoutinesOfTheDay(getCurrentActiveSection());
+        this.mealPlan = planWithId;
+        this.mealPlanId = planWithId.getUid();
+        tabfrag.loadRoutinesOfTheDay(getCurrentActiveSection());
     }
 
     @Override
@@ -274,11 +310,79 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_edit_plan) {
+            String emailOrPhone = getMealPlan().getCreator();
+            if(LoginUtils.matchUser(emailOrPhone)){
+                getNavigator().navigateToUpdateMealPlanActivity(getMealPlan());
+            } else {
+                showCreateCopyDialog();
+            }
+            return true;
+        }
+         else if (id == R.id.action_auto_load) {
+            String emailOrPhone = getMealPlan().getCreator();
+            if(LoginUtils.matchUser(emailOrPhone)){
+                showAutoLoadDialog();
+            } else {
+                showCreateCopyDialog();
+            }
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showAutoLoadDialog() {
+        (new MaterialDialog.Builder(this))
+                .title("Load Meals")
+                .content("Meals will be loaded in all the routine automatically considering" +
+                        " daily calory needs \n \n Note: already added meals will be untouched")
+                .positiveText("Load Meals")
+                .negativeText("Cancel")
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                        autoLoadMeals();
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void autoLoadMeals() {
+        MealPlanUseCase usecase = (MealPlanUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.CREATE_MEAL_PLAN);
+        List<Integer> pRoutines = new ArrayList<>();
+        pRoutines.add(1);pRoutines.add(2);pRoutines.add(3);pRoutines.add(4);pRoutines.add(5);pRoutines.add(6);pRoutines.add(7);
+        usecase.autoLoadMealPlan(this, mealPlan, true, pRoutines, true);
+    }
+
+    private void showCreateCopyDialog() {
+        (new MaterialDialog.Builder(this))
+                .title("Restricted Access")
+                .content("Your don't have access to modify this plan." +
+                        "However you can create a new copy and modify it accordingly")
+                .positiveText("Create Copy")
+                .negativeText("Cancel")
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                        getNavigator().navigateToCopyMealPlanActivity(getMealPlan());
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -291,7 +395,7 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_meal_plans) {
             getNavigator().navigateToBrowseMealPlanActivity();
         } else if (id == R.id.nav_manage) {
 

@@ -2,14 +2,17 @@ package com.techticz.app.domain.repository.database;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.dietchart.auth.utils.LoginUtils;
 import com.techticz.app.constant.AppConstants;
 import com.techticz.app.constant.Routines;
 import com.techticz.app.domain.interactor.CreateFoodInteractor;
+import com.techticz.app.domain.interactor.LoginInteractor;
 import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
@@ -19,9 +22,11 @@ import com.techticz.app.domain.model.pojo.MealRoutineWeekInfo;
 import com.techticz.app.domain.model.pojo.Nutrition;
 import com.techticz.app.domain.repository.IAppRepository;
 import com.techticz.app.executor.BaseInteractor;
+import com.techticz.app.utility.AppLogger;
 import com.techticz.app.utility.CommonUtils;
+import com.techticz.dietchart.backend.appUserApi.model.AppUser;
+import com.techticz.dietchart.backend.appUserApi.model.UserLoginResponse;
 import com.techticz.dietchart.backend.blobApi.model.ImageUploadResponse;
-import com.techticz.dietchart.backend.foodEntityApi.model.FoodEntity;
 import com.techticz.dietchart.backend.myApi.model.SystemHealth;
 
 import java.io.ByteArrayInputStream;
@@ -141,16 +146,16 @@ public class DataBaseRepository implements IAppRepository {
     }
 
     @Override
-    public long createMealPlan(BaseInteractor interactor, MealPlan plan) {
+    public long createMealPlan(BaseInteractor interactor, MealPlan plan,Boolean b,List<Integer> pRoutines) {
         long id = 0;
         id =  db.mealPlanDao().insert(plan);
         return id;
     }
 
     @Override
-    public int updateMealPlan(BaseInteractor interactor, MealPlan plan) {
-
-        return (int) db.mealPlanDao().update(plan);
+    public MealPlan updateMealPlan(BaseInteractor interactor, MealPlan plan, boolean autoLoad, List<Integer> prefRoutines) {
+        db.mealPlanDao().update(plan);
+        return plan;
 
     }
 
@@ -192,7 +197,10 @@ public class DataBaseRepository implements IAppRepository {
     @Override
     public List<MealPlan> getMealPlans(BaseInteractor interactor, String searchKey, boolean isMyPlan) {
         if (isMyPlan) {
-            return db.mealPlanDao().getPlansByCreater("user");
+            String user = LoginUtils.getUserCredential();
+            return db.mealPlanDao().getPlansByCreater(user);
+        } else if(TextUtils.isEmpty(searchKey)){
+            return db.mealPlanDao().isRecommendedPlans(true);
         } else {
             return db.mealPlanDao().getAllContains("%" + searchKey + "%");
         }
@@ -236,7 +244,8 @@ public class DataBaseRepository implements IAppRepository {
 
     @Override
     public long updateFood(CreateFoodInteractor createFoodInteractor, Food food) {
-        return 0;
+        int l = db.foodDao().update(food);
+        return l;
     }
 
     @Override
@@ -254,6 +263,77 @@ public class DataBaseRepository implements IAppRepository {
     public Meal getMealDetails(BaseInteractor i, long mealId) {
         Meal meal = db.mealDao().getById(mealId);
         return meal;
+    }
+
+    @Override
+    public UserLoginResponse login(LoginInteractor loginInteractor, AppUser appUser) {
+        return null;
+    }
+
+    @Override
+    public void insertFoods(BaseInteractor interactor, List<Food> foods) {
+        if(foods == null) return;
+        for(Food f: foods){
+            try{
+                db.foodDao().insert(f);
+            } catch(SQLiteConstraintException e) {
+                e.printStackTrace();
+                AppLogger.e(this,"Food Insert Failed(Already Exist), Now Trying Updating..");
+                try {
+                    db.foodDao().update(f);
+                } catch (Exception ee){
+                    ee.printStackTrace();
+                    AppLogger.e(this,"Food Update Failed.");
+                }
+            } catch(Exception eee){
+                eee.printStackTrace();
+                AppLogger.e(this,"Food Insert Failed.");
+            }
+        }
+    }
+
+    @Override
+    public void insertMeals(BaseInteractor interactor, List<Meal> mealList) {
+        if(mealList == null) return;
+        for(Meal m: mealList){
+            try{
+                db.mealDao().insert(m);
+            } catch(SQLiteConstraintException e) {
+                e.printStackTrace();
+                AppLogger.e(this,"Meal Insert Failed(Already Exist), Now Trying Updating..");
+                try {
+                    db.mealDao().update(m);
+                } catch (Exception ee){
+                    ee.printStackTrace();
+                    AppLogger.e(this,"Meal Update Failed.");
+                }
+            } catch(Exception eee){
+                eee.printStackTrace();
+                AppLogger.e(this,"Meal Insert Failed.");
+            }
+        }
+    }
+
+    @Override
+    public void insertMealPlans(LoginInteractor loginInteractor, List<MealPlan> mealPlans) {
+        if(mealPlans == null) return;
+        for(MealPlan p: mealPlans){
+            try{
+                db.mealPlanDao().insert(p);
+            } catch(SQLiteConstraintException e) {
+                e.printStackTrace();
+                AppLogger.e(this,"MealPlan Insert Failed(Already Exist), Now Trying Updating..");
+                try {
+                    db.mealPlanDao().update(p);
+                } catch (Exception ee){
+                    ee.printStackTrace();
+                    AppLogger.e(this,"MealPlan Update Failed.");
+                }
+            } catch(Exception eee){
+                eee.printStackTrace();
+                AppLogger.e(this,"MealPlan Insert Failed.");
+            }
+        }
     }
 
     @Override

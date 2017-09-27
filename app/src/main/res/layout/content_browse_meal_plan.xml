@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.techticz.app.ui.activity.BrowseMealPlanActivity"
-    tools:showIn="@layout/activity_browse_meal_plan">
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
         xmlns:tools="http://schemas.android.com/tools"
@@ -14,19 +7,51 @@
         android:layout_height="match_parent"
         tools:context="com.techticz.app.ui.activity.BrowseMealActivity"
         android:orientation="vertical">
-
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="200dp"
+        android:orientation="vertical">
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Recommended Meal Plans"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Recommended Plans"
             style="@style/Text.Dark.Large"
-            android:layout_margin="16dp"/>
+            android:gravity="center_vertical|left"
+            android:textColor="@color/white"
+            android:background="@drawable/side_ribbon"
+            android:layout_marginTop="16dp"
+            />
         <com.yarolegovich.discretescrollview.DiscreteScrollView
             android:id="@+id/scroller"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            >
 
         </com.yarolegovich.discretescrollview.DiscreteScrollView>
-
     </LinearLayout>
-</android.support.v4.widget.NestedScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="200dp"
+        android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="My Plans"
+        style="@style/Text.Dark.Large"
+        android:gravity="center_vertical|left"
+        android:textColor="@color/white"
+        android:background="@drawable/side_ribbon"
+        android:layout_marginTop="16dp"
+        />
+    <com.yarolegovich.discretescrollview.DiscreteScrollView
+        android:id="@+id/scroller_my_plans"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content">
+
+    </com.yarolegovich.discretescrollview.DiscreteScrollView>
+    </LinearLayout>
+    </LinearLayout>

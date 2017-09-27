@@ -1,13 +1,17 @@
 package com.techticz.app.ui.customview;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.techticz.app.R;
 import com.techticz.app.domain.interactor.FetchImageInteractor;
 
@@ -50,6 +54,7 @@ public class MealRoutineView extends FrameLayout {
         this.viewModel = viewModel;
         TextView routineName = (TextView) findViewById(R.id.tv_routine_name);
         TextView routineDesc = (TextView) findViewById(R.id.tv_routine_desc);
+        ImageView iv_clear  = (ImageView)findViewById(R.id.iv_remove);
         ViewGroup vg = (ViewGroup) findViewById(R.id.ll_routine_bg);
         LinearLayout mealContainer = (LinearLayout) findViewById(R.id.ll_meal_container);
         LinearLayout addMeal = (LinearLayout) findViewById(R.id.ll_add_meal);
@@ -57,7 +62,13 @@ public class MealRoutineView extends FrameLayout {
 
         routineName.setText(viewModel.getName());
         routineDesc.setText(viewModel.getDesc());
-
+        iv_clear.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleRemoveClick();
+            }
+        });
+/*
         if (viewModel.getName().contains("Breakfast")) {
             vg.setBackgroundResource(R.drawable.bg_card_13);
         } else if (viewModel.getName().contains("Lunch")) {
@@ -66,15 +77,19 @@ public class MealRoutineView extends FrameLayout {
             vg.setBackgroundResource(R.drawable.bg_card_11);
         } else if (viewModel.getName().contains("Dinner")) {
             vg.setBackgroundResource(R.drawable.bg_card_7);
-        }
+        }*/
+        vg.setBackgroundResource(R.drawable.bg_card_7);
         if (viewModel.getMeal() != null) {
             addMeal.setVisibility(GONE);
+            iv_clear.setVisibility(VISIBLE);
             MealView mealView = new MealView(getContext());
             mealContainer.addView(mealView);
 
             mealView.fillDetails(viewModel.getMeal());
         } else {
+            mealContainer.removeAllViews();
             addMeal.setVisibility(VISIBLE);
+            iv_clear.setVisibility(GONE);
             addMeal.findViewById(R.id.b_add_meal).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -83,6 +98,32 @@ public class MealRoutineView extends FrameLayout {
             });
         }
 
+    }
+
+    private void handleRemoveClick() {
+            (new MaterialDialog.Builder(getContext()))
+                    .title("Remove Meal")
+                    .content("Would you really like to remove this meal from the routine?")
+                    .positiveText("Remove")
+                    .negativeText("Cancel")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                            removeMealFromRoutine();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+    }
+
+    private void removeMealFromRoutine() {
+        ((DailyRoutineActivity)getContext()).removeMealFromRoutine(day,viewModel.getUid(),viewModel.getMeal());
     }
 
     private void onAddMealClick() {

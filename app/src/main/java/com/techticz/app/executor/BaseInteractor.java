@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.text.TextUtils;
 
+import com.tecticz.powerkit.ui.dialog.BetterProgressDialog;
+
 public abstract class BaseInteractor implements IInteractor {
 
+    private final BetterProgressDialog betterDialog;
     private Context context;
     private IInteractorExecutor interactorExecutor;
     private IMainThreadExecutor mainThreadExecutor;
@@ -20,6 +23,7 @@ public abstract class BaseInteractor implements IInteractor {
             dialog.dismiss();
         }
     };
+    private int dialogType;
 
 
     public BaseInteractor(Context context, IInteractorExecutor interactorExecutor, IMainThreadExecutor mainThreadExecutor) {
@@ -32,6 +36,10 @@ public abstract class BaseInteractor implements IInteractor {
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.setOnCancelListener(onDialogCancelListener);
         progressDialog.setCancelable(true);
+
+        betterDialog = new BetterProgressDialog(context,true,onDialogCancelListener);
+
+        betterDialog.setCanceledOnTouchOutside(false);
     }
 
     public boolean isCancelled() {
@@ -73,22 +81,44 @@ public abstract class BaseInteractor implements IInteractor {
         }
     }
 
+
     public void showDialog() {
-        if (progressDialog != null) {
-            progressDialog.show();
-        }
+        showDialog(1);
     }
 
-    public void showDialog(String message) {
-        if (progressDialog != null && !TextUtils.isEmpty(message)) {
-            progressDialog.setMessage(message);
-            progressDialog.show();
+
+    public void showDialog(int dialogType){
+        this.dialogType = dialogType;
+        showDialog(this.dialogType,"Loading ..");
+    }
+
+    public void showDialog(String message){
+        this.dialogType = 1;
+        showDialog(this.dialogType,message);
+    }
+
+
+    public void showDialog(int dialogType,String message){
+        this.dialogType = dialogType;
+        if(dialogType == 0) {
+            if(progressDialog != null && !TextUtils.isEmpty(message)) {
+                progressDialog.setMessage(message);
+                progressDialog.show();
+            }
+        } else {
+            if (betterDialog != null && !TextUtils.isEmpty(message)) {
+                betterDialog.setLabel(message);
+                betterDialog.show();
+            }
         }
     }
 
     public void dismissDialog() {
         if (progressDialog != null) {
             progressDialog.dismiss();
+        }
+        if (betterDialog != null) {
+            betterDialog.dismiss();
         }
     }
 }

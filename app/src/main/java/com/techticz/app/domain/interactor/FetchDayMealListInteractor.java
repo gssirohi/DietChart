@@ -5,8 +5,10 @@ import android.content.Context;
 import com.techticz.app.base.AppCore;
 import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.Repositories;
-import com.techticz.app.domain.exception.AppRepositoryException;
+import com.techticz.app.domain.exception.AppException;
+import com.techticz.app.domain.model.pojo.AddedFood;
 import com.techticz.app.domain.model.pojo.DayMeals;
+import com.techticz.app.domain.model.pojo.Food;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.model.pojo.MealRoutine;
 import com.techticz.app.domain.repository.IAppRepository;
@@ -15,6 +17,7 @@ import com.techticz.app.executor.IInteractorExecutor;
 import com.techticz.app.executor.IMainThreadExecutor;
 import com.techticz.app.utility.AppLogger;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -37,15 +40,15 @@ public class FetchDayMealListInteractor extends BaseInteractor implements FetchD
     public void run() {
 
         try {
-            Thread.sleep(300);
-
             final List<Meal> meals = appRepository.getDayMealList(this, day, dayMeals);
             IAppRepository repo = AppCore.getInstance().getProvider().getAppRepository(Repositories.DATABASE);
             final List<MealRoutine> routines = repo.getMealRoutinesByDay(this, day);
 
             int i = 0;
             for (MealRoutine routine : routines) {
-                routine.setMeal(meals.get(i++));
+                Meal meal = meals.get(i++);
+                loadFoods(meal);
+                routine.setMeal(meal);
             }
 
             dismissDialog();
@@ -57,7 +60,7 @@ public class FetchDayMealListInteractor extends BaseInteractor implements FetchD
                     }
                 });
 
-        } catch (final AppRepositoryException e) {
+        } catch (final AppException e) {
             AppLogger.e(this, "Error on fetch routines for day " + day);
             if (!isCancelled())
                 getMainThreadExecutor().execute(new Runnable() {
@@ -66,9 +69,7 @@ public class FetchDayMealListInteractor extends BaseInteractor implements FetchD
                         callback.onError(e.getError());
                     }
                 });
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch(Exception e){
+        }catch(Exception e){
             getMainThreadExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -77,7 +78,18 @@ public class FetchDayMealListInteractor extends BaseInteractor implements FetchD
             });
         }
     }
-
+    private void loadFoods(Meal meal) {
+        if(meal == null) return;
+        List<AddedFood> list = meal.getAddedFoods();
+        if(list != null){
+            Iterator<AddedFood> it = list.iterator();
+            while (it.hasNext()){
+                AddedFood af = it.next();
+                List<Food> fss = appRepository.getFoodList(this, "", new Long[]{af.getFoodId()});
+                af.setFood(fss.get(0));
+            }
+        }
+    }
     @Override
     public void cancelCurrentRequest() {
         setCancelled(true);

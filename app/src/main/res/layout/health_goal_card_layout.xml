@@ -72,7 +72,7 @@
             android:id="@+id/ll_health_goal_card_content"
             android:orientation="vertical">
 
-            <android.support.design.widget.TextInputLayout
+                    <android.support.design.widget.TextInputLayout             android:theme="@style/Text.Light.Medium"
                 android:id="@+id/til_target_weight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

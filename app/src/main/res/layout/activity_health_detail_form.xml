@@ -22,7 +22,7 @@
             app:contentScrim="?attr/colorPrimary"
             android:background="@drawable/bg_card_5"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
-            <com.techticz.app.ui.customview.RoundImageView
+            <com.tecticz.powerkit.ui.customview.RoundImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
