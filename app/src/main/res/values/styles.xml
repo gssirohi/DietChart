@@ -37,6 +37,8 @@
         <item name="android:textAllCaps">true</item>
         <!-- <item name="android:textStyle">bold</item> -->
         <item name="android:background">@drawable/bg_button_accent</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="Card.Title" parent="Text.Light.VeryLarge.Bold">

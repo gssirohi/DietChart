@@ -12,9 +12,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-
-        >
-
+        tools:replace="android:allowBackup">
         <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,9 +54,7 @@
         <activity
             android:name=".ui.activity.BrowseMealPlanActivity"
             android:label="@string/title_activity_browse_meal_plan"
-            android:theme="@style/AppTheme.NoActionBar"
-             />
-
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

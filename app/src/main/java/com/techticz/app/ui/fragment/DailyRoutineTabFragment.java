@@ -113,7 +113,7 @@ public class DailyRoutineTabFragment extends Fragment implements DayMealsListFra
         });
         mViewPager.setOffscreenPageLimit(0);
 
-        TabLayout tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
+        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
     }
@@ -168,5 +168,9 @@ public class DailyRoutineTabFragment extends Fragment implements DayMealsListFra
 
     public void loadRoutinesOfTheDay(int day) {
         ((DayMealsListFragment) mDailyRoutinePagerAdapter.getItem(day)).forceLoadRoutinesForDay();
+    }
+
+    public MealRoutine getNextMealRoutine(){
+        return ((DayMealsListFragment) mDailyRoutinePagerAdapter.getItem(activeDay)).getNextMealRoutine();
     }
 }

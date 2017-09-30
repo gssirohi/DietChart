@@ -158,4 +158,25 @@ public class Converters {
         return ids;
     }
 
+    public static String arrayToString(int[] ints) {
+        String s = "";
+        for(int i = 0;i<ints.length;i++){
+            s=s+ints[i];
+            if(i<ints.length-1){
+                s= s+":";
+            }
+        }
+        return s;
+    }
+
+    public static int[] stringToArray(String s){
+        if(TextUtils.isEmpty(s)) return new int[]{};
+        String[] ss = s.split(":");
+        int[] ints = new int[ss.length];
+        int i = 0;
+        for(String str: ss){
+            ints[i++] = Integer.parseInt(str);
+        }
+        return ints;
+    }
 }

@@ -9,12 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+
 import com.tecticz.powerkit.R;
 
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by gssirohi on 13/7/16.
@@ -45,8 +42,7 @@ public class BetterProgressDialog extends Dialog {
 
 
         ImageView imageView = (ImageView) findViewById(R.id.civ_gif);
-        GlideDrawableImageViewTarget imagePreview = new GlideDrawableImageViewTarget(imageView);
-        Glide.with(getContext()).load(R.raw.popcorn_transparent).into(imagePreview);
+        Glide.with(getContext()).load(R.raw.popcorn_transparent).into(imageView);
 
         refresh();
     }

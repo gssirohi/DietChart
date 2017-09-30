@@ -66,6 +66,7 @@ public class MealView extends FrameLayout implements FetchBlobUseCase.Callback, 
         addView(itemView);
     }
 
+
     public void fillDetails(Meal viewModel) {
         this.viewModel = viewModel;
 

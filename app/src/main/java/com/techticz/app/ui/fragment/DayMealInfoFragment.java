@@ -20,6 +20,7 @@ import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.NutitionInfo;
 import com.techticz.app.ui.activity.DailyRoutineActivity;
 import com.techticz.app.ui.customview.CircleItemView;
+import com.techticz.app.utility.AppUtils;
 
 /**
  * <p>A fragment that shows a list of items as a modal bottom sheet.</p>
@@ -29,7 +30,7 @@ import com.techticz.app.ui.customview.CircleItemView;
  * </pre>
  * <p>You activity (or fragment) needs to implement {@link DayMealInfoFragment.Listener}.</p>
  */
-public class DayMealInfoFragment extends BottomSheetDialogFragment implements IExtractNutritientUseCase.Callback {
+public class DayMealInfoFragment extends BottomSheetDialogFragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_ITEM_COUNT = "item_count";
@@ -52,11 +53,7 @@ public class DayMealInfoFragment extends BottomSheetDialogFragment implements IE
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        IExtractNutritientUseCase usecase = (IExtractNutritientUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.CALCULATE_NUTRI);
-        int current = ((DailyRoutineActivity)getActivity()).getCurrentActiveSection();
-        DayMeals dayMeals = ((DailyRoutineActivity) getActivity()).getDayMealIdsByDay(current);
-
-        usecase.execute(this,true,null,dayMeals,null);
+        refreshView();
     }
 
     @Override
@@ -76,18 +73,32 @@ public class DayMealInfoFragment extends BottomSheetDialogFragment implements IE
         super.onDetach();
     }
 
-    @Override
-    public void onError(AppErrors error) {
+
+    public void refreshView(){
+        fetchTodaysTargetNutritions();
 
     }
 
-    @Override
-    public void onNutritionFetched(NutitionInfo meal, NutitionInfo dayMeals, NutitionInfo plan) {
-        loadUI(dayMeals);
+    private void fetchTodaysTargetNutritions(){
+        IExtractNutritientUseCase usecase = (IExtractNutritientUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(getContext(), UseCases.CALCULATE_NUTRI);
+        int today = AppUtils.getToday();
+        DayMeals dayMeals = ((DailyRoutineActivity)getContext()).getDayMealIdsByDay(today);
+        usecase.execute(new IExtractNutritientUseCase.Callback() {
+            @Override
+            public void onError(AppErrors error) {
+
+            }
+
+            @Override
+            public void onNutritionFetched(NutitionInfo meal, NutitionInfo dayMeals, NutitionInfo plan) {
+                loadUI(dayMeals);
+            }
+        }, false, null, dayMeals, null);
     }
 
     private void loadUI(NutitionInfo info) {
         View view = getView();
+        if(view == null) return;
         ((CircleItemView)view.findViewById(R.id.civ_calory)).set("Calory",info.getCalory());
         ((CircleItemView)view.findViewById(R.id.civ_carbs)).set("Carbs",info.getCarbs());
         ((CircleItemView)view.findViewById(R.id.civ_fat)).set("Fat",info.getFat());

@@ -28,14 +28,15 @@
                 android:id="@+id/iv_meal_image"
                 android:src="@drawable/app_icon"
                 android:layout_gravity="center"
-                android:layout_margin="10dp" />
+                android:layout_margin="8dp" />
 
             <LinearLayout
                 android:orientation="vertical"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="10dp"
+                android:layout_weight="7">
 
                 <TextView
                     android:id="@+id/tv_meal_name"
@@ -63,12 +64,23 @@
                     android:text="Boiled potao with onion tomato gravy, served with butter roti"
                     style="@style/Text.Dark.Small" />
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Explore"
+                android:layout_gravity="end"
+                android:gravity="end|center_vertical"
+                android:textAllCaps="true"
+                style="@style/TextAction"
+                android:id="@+id/tv_meal_explore"
+                android:layout_weight=".5" />
         </LinearLayout>
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
             android:id="@+id/ll_nutritient_view_container">
 
             <include
@@ -99,13 +111,4 @@
                 android:id="@+id/label_value_protine"
                 android:layout_weight="1" />
         </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:text="Explore"
-        android:layout_gravity="end"
-        android:textAllCaps="true"
-        style="@style/TextAction"
-        android:id="@+id/tv_meal_explore" />
     </LinearLayout>

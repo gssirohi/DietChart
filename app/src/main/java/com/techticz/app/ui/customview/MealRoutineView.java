@@ -31,6 +31,7 @@ public class MealRoutineView extends FrameLayout {
     private final int day;
     private MealRoutine viewModel;
     private FetchImageInteractor interactor;
+    private MealView mealView;
 
     public MealRoutineView(int tab, ViewGroup parent) {
         super(parent.getContext());
@@ -47,6 +48,7 @@ public class MealRoutineView extends FrameLayout {
         ViewGroup itemView =
                 (ViewGroup) LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.meal_routine_layout, parent, false);
+        itemView.findViewById(R.id.ll_status).setVisibility(GONE);
         addView(itemView);
     }
 
@@ -82,7 +84,7 @@ public class MealRoutineView extends FrameLayout {
         if (viewModel.getMeal() != null) {
             addMeal.setVisibility(GONE);
             iv_clear.setVisibility(VISIBLE);
-            MealView mealView = new MealView(getContext());
+            mealView = new MealView(getContext());
             mealContainer.addView(mealView);
 
             mealView.fillDetails(viewModel.getMeal());
@@ -98,6 +100,10 @@ public class MealRoutineView extends FrameLayout {
             });
         }
 
+    }
+
+    public MealView getMealView() {
+        return mealView;
     }
 
     private void handleRemoveClick() {
@@ -131,7 +137,9 @@ public class MealRoutineView extends FrameLayout {
         MealPlan plan = ((DailyRoutineActivity) getContext()).getMealPlan();
         AppNavigator.startBrowseMealActivity((Activity) getContext(), plan.getUid(), day, viewModel.getUid());
     }
-
+    public void setStatusActionVisibility(int visibility){
+        findViewById(R.id.ll_status).setVisibility(visibility);
+    }
     public MealRoutine getViewModel() {
         return viewModel;
     }

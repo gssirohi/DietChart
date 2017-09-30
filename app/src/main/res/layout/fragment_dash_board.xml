@@ -1,0 +1,99 @@
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:animateLayoutChanges="true"
+    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true"
+    tools:context=".ui.activity.DailyRoutineActivity">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <com.tecticz.powerkit.ui.customview.CircleGraphView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:id="@+id/cgv_calory">
+
+    </com.tecticz.powerkit.ui.customview.CircleGraphView>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="Today's Target"
+        style="@style/Text.Light.VeryLarge"
+        android:textSize="24sp"/>
+</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <com.tecticz.powerkit.ui.customview.CircleGraphView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:id="@+id/cgv_protine"
+            android:layout_weight="1">
+
+        </com.tecticz.powerkit.ui.customview.CircleGraphView>
+        <com.tecticz.powerkit.ui.customview.CircleGraphView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:id="@+id/cgv_carbs"
+            android:layout_weight="1">
+
+        </com.tecticz.powerkit.ui.customview.CircleGraphView>
+        <com.tecticz.powerkit.ui.customview.CircleGraphView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:id="@+id/cgv_fat"
+            android:layout_weight="1">
+
+        </com.tecticz.powerkit.ui.customview.CircleGraphView>
+<!--        <com.tecticz.powerkit.ui.customview.CircleGraphView
+            android:layout_width="100dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:id="@+id/cgv_fiber">
+
+        </com.tecticz.powerkit.ui.customview.CircleGraphView>-->
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/colorPrimary"></View>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fl_suggestion">
+
+    </FrameLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fl_next_meal_container">
+        <com.yarolegovich.discretescrollview.DiscreteScrollView
+            android:id="@+id/scroller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:paddingStart="0dp"
+            app:paddingEnd="0dp"
+            android:layout_gravity="center"
+            >
+
+        </com.yarolegovich.discretescrollview.DiscreteScrollView>
+    </FrameLayout>
+
+</LinearLayout>
+</android.support.v4.widget.NestedScrollView>

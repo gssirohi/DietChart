@@ -110,4 +110,8 @@ public class DayMeals {
         list[6] = getR7();
         return list;
     }
+
+    public void setMeals(long i1, long i2, long i3, long i4, long i5, long i6,long i7) {
+        setR1(i1);setR2(i2);setR3(i3);setR4(i4);setR5(i5);setR6(i6);setR7(i7);
+    }
 }

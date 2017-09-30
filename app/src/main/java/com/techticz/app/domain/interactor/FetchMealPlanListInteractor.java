@@ -73,7 +73,7 @@ public class FetchMealPlanListInteractor extends BaseInteractor implements Fetch
 
         if (showLoader){
             if(isMyPlan)
-            showDialog("Searching your meal plans .. ");
+            showDialog(0,"Searching your meal plans .. ");
             else
                 showDialog("Searching recommended meal plans .. ");
         }

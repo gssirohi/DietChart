@@ -32,8 +32,6 @@ import com.yarolegovich.discretescrollview.transform.ScaleTransformer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.view.View.GONE;
-
 public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPlanListUseCase.Callback,
         MealPlanPagerAdapter.CallBack,BrowsePlanRecyclerViewAdapter.MealPlanViewContract {
 
@@ -50,7 +48,7 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
     List<MealPlan> myPlansData;
     private MealPlanPagerAdapter recommendedAdapter;
     private MealPlanPagerAdapter myPlansAdapter;
-    private FetchMealPlanListUseCase myPlanListUseCase;
+    private FetchMealPlanListUseCase mealPlansUseCase;
     private FetchMealPlanListUseCase searchFoodUseCase;
     private DiscreteScrollView scrollerRecommendedPlans;
     private DiscreteScrollView scrollerMyPlans;
@@ -100,11 +98,11 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
                 .setPivotX(Pivot.X.CENTER) // CENTER is a default one
                 .setPivotY(Pivot.Y.BOTTOM) // CENTER is a default one
                 .build());
-        if (myPlanListUseCase == null) {
-            myPlanListUseCase = (FetchMealPlanListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_PLAN_LIST);
+        if (mealPlansUseCase == null) {
+            mealPlansUseCase = (FetchMealPlanListUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_PLAN_LIST);
         }
 
-        myPlanListUseCase.execute(this, true, "", true);
+        mealPlansUseCase.execute(this, true, "", false);
 
     }
 
@@ -188,15 +186,16 @@ public class BrowseMealPlanActivity extends BaseActivity implements FetchMealPla
             myPlansData.addAll(plans);
             myPlansAdapter.notifyDataSetChanged();
 
-            myPlanListUseCase.execute(this, true, "", false);
         } else if (currentSearchKey != null && currentSearchKey.equalsIgnoreCase(searchKey)) {
             recommendedPlansData.clear();
             recommendedPlansData.addAll(plans);
             recommendedAdapter.notifyDataSetChanged();
+            mealPlansUseCase.execute(this, true, "", true);
         } else {
             recommendedPlansData.clear();
             recommendedPlansData.addAll(plans);
             recommendedAdapter.notifyDataSetChanged();
+            mealPlansUseCase.execute(this, true, "", true);
         }
 
     }

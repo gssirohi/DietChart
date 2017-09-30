@@ -3,12 +3,16 @@ package com.techticz.app.ui.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -16,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -29,6 +34,8 @@ import com.techticz.app.base.BaseActivity;
 import com.techticz.app.constant.AppErrors;
 import com.techticz.app.constant.Key;
 import com.techticz.app.constant.UseCases;
+import com.techticz.app.domain.interactor.FetchBlobUseCase;
+import com.techticz.app.domain.interactor.IExtractNutritientUseCase;
 import com.techticz.app.domain.interactor.MealPlanUseCase;
 import com.techticz.app.domain.interactor.FetchDayMealListInteractor;
 import com.techticz.app.domain.interactor.FetchDayMealListUseCase;
@@ -37,12 +44,15 @@ import com.techticz.app.domain.model.pojo.DayMeals;
 import com.techticz.app.domain.model.pojo.Meal;
 import com.techticz.app.domain.model.pojo.MealPlan;
 import com.techticz.app.domain.model.pojo.MealRoutine;
+import com.techticz.app.domain.model.pojo.NutitionInfo;
 import com.techticz.app.ui.customview.ProductCardView;
 import com.techticz.app.ui.fragment.DailyRoutineTabFragment;
+import com.techticz.app.ui.fragment.DashBoardFragment;
 import com.techticz.app.ui.fragment.DayMealInfoFragment;
 import com.techticz.app.ui.fragment.ProductDetailsFragment;
 
 import com.techticz.app.ui.viewmodel.contract.IProductViewModel;
+import com.techticz.app.utility.AppUtils;
 import com.tecticz.powerkit.ui.customview.RoundImageView;
 
 import org.parceler.Parcels;
@@ -52,12 +62,14 @@ import java.util.List;
 
 public class DailyRoutineActivity extends BaseActivity implements ProductCardView.ProductCardViewContract,
         GetMealPlanUseCase.Callback, FetchDayMealListUseCase.Callback,
-        MealPlanUseCase.Callback, NavigationView.OnNavigationItemSelectedListener  {
+        MealPlanUseCase.Callback, NavigationView.OnNavigationItemSelectedListener, FetchBlobUseCase.Callback {
 
     private OnResult resultWatcher;
-    private DailyRoutineTabFragment tabfrag;
+    private DailyRoutineTabFragment chartFrag;
     private Long mealPlanId;
     private MealPlan mealPlan;
+    private DashBoardFragment dashFrag;
+    private ImageView iv_meal_plan;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -73,6 +85,8 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ((AppBarLayout)findViewById(R.id.app_bar)).setExpanded(false,true);
+        iv_meal_plan = (ImageView)findViewById(R.id.iv_meal_plan);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -93,12 +107,16 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         navigationView.setNavigationItemSelectedListener(this);
         setUpNavigationDrawer(navigationView);
         mealPlanId = getIntent().getLongExtra("meal_plan_id", 0);
+
+        dashFrag = DashBoardFragment.newInstance();
+        chartFrag = DailyRoutineTabFragment.newInstance();
         fetchMealPlan();
     }
 
     private void displayPlanInfoFragment() {
         DayMealInfoFragment.newInstance().show(getSupportFragmentManager(), "dialog");
     }
+
 
     private void setUpNavigationDrawer(NavigationView navigationView) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -120,50 +138,11 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         usecase.execute(this, mealPlanId, true);
     }
 
-/*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_my_trips_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-*/
-
     public static Intent getCallingIntent(Context context, Long planId) {
         Intent i = new Intent(context, DailyRoutineActivity.class);
         i.putExtra("meal_plan_id", planId);
         return i;
     }
-
-
-/*
-    @Override
-    public void onBackPressed() {
-        int fragments = getSupportFragmentManager().getBackStackEntryCount();
-        if (fragments == 1) {
-            finish();
-            return;
-        }
-
-        super.onBackPressed();
-    }
-*/
 
     public void fetchRoutinesForDay(int day, OnResult resultWatcher) {
         this.resultWatcher = resultWatcher;
@@ -244,7 +223,7 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
     }
 
     public int getCurrentActiveSection() {
-        return tabfrag.getActiveSection();
+        return chartFrag.getActiveSection();
     }
 
     @Override
@@ -253,10 +232,22 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
     }
 
     @Override
+    public void onBlobFetched(String blobKey, Bitmap bitmap) {
+        if(bitmap != null){
+            //iv_meal_plan.setImageBitmap(AppUtils.blurRenderScript(this,bitmap,10));
+            iv_meal_plan.setImageBitmap(bitmap);
+//            Glide.with(this).load(bitmap)
+//                    .apply(bitmapTransform(new BlurTransformation(25)))
+//                    .into(iv_meal_plan);
+        }
+    }
+
+    @Override
     public void onMealPlanCreated(MealPlan planWithId) {
         this.mealPlan = planWithId;
         this.mealPlanId = planWithId.getUid();
-        tabfrag.loadRoutinesOfTheDay(getCurrentActiveSection());
+        loadMealPlanImage();
+        chartFrag.loadRoutinesOfTheDay(getCurrentActiveSection());
     }
 
     @Override
@@ -268,15 +259,19 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
     public void onMealPlanFetched(MealPlan planWithId) {
         if(planWithId != null) {
             this.mealPlan = planWithId;
-            ((Toolbar) findViewById(R.id.toolbar)).setTitle(planWithId.getName());
-            tabfrag = DailyRoutineTabFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, tabfrag, "tabs").commit();
+            ((CollapsingToolbarLayout) findViewById(R.id.toolbar_layout)).setTitle(planWithId.getName());
+
+            loadMealPlanImage();
+            showDashBoard();
         } else {
             //display error view or open meal plan browse screen
         }
     }
 
-
+    private void loadMealPlanImage() {
+        FetchBlobUseCase usecase = (FetchBlobUseCase) AppCore.getInstance().getProvider().getUseCaseImpl(this, UseCases.FETCH_BLOB);
+        usecase.execute(this,false,getMealPlan().getBlobKey(),getMealPlan().getBlobServingUrl());
+    }
     @Override
     public void onBackPressed() {
 /*
@@ -391,10 +386,10 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
+        if (id == R.id.nav_dash_board) {
+            showDashBoard();
+        } else if (id == R.id.nav_diet_chart) {
+            showDietChart();
         } else if (id == R.id.nav_meal_plans) {
             getNavigator().navigateToBrowseMealPlanActivity();
         } else if (id == R.id.nav_manage) {
@@ -410,10 +405,48 @@ public class DailyRoutineActivity extends BaseActivity implements ProductCardVie
         return true;
     }
 
+    private void showDashBoard() {
+        findViewById(R.id.fab).setVisibility(View.GONE);
+        FragmentTransaction ft = null;
+        ft = getSupportFragmentManager().beginTransaction();
+        if(getSupportFragmentManager().findFragmentByTag("dash") == null){
+            if(dashFrag == null){
+                dashFrag = DashBoardFragment.newInstance();
+            }
+            ft.add(R.id.fragment_container,dashFrag,"dash");
+            ft.show(dashFrag);
+        } else {
+            ft.show(getSupportFragmentManager().findFragmentByTag("dash"));
+        }
+        if(getSupportFragmentManager().findFragmentByTag("chart") != null){
+            ft.hide(getSupportFragmentManager().findFragmentByTag("chart"));
+        }
+        ft.commit();
+    }
+
+    private void showDietChart() {
+        findViewById(R.id.fab).setVisibility(View.VISIBLE);
+        FragmentTransaction ft = null;
+        ft = getSupportFragmentManager().beginTransaction();
+        if(getSupportFragmentManager().findFragmentByTag("chart") == null){
+            if(chartFrag == null){
+                chartFrag = DailyRoutineTabFragment.newInstance();
+            }
+            ft.add(R.id.fragment_container,chartFrag,"chart");
+            ft.show(chartFrag);
+        } else {
+            ft.show(getSupportFragmentManager().findFragmentByTag("chart"));
+        }
+
+        if(getSupportFragmentManager().findFragmentByTag("dash") != null){
+            ft.hide(getSupportFragmentManager().findFragmentByTag("dash"));
+        }
+        ft.commit();
+    }
+
     public MealPlan getMealPlan() {
         return mealPlan;
     }
-
 
     public interface OnResult {
         void updateRoutineList(int day, List<MealRoutine> routines);

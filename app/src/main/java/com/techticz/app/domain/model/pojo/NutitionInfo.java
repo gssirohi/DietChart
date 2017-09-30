@@ -310,4 +310,9 @@ public class NutitionInfo {
         sugar = sugar*serving;
         cholestrol = cholestrol*serving;
     }
+
+    @Override
+    public String toString(){
+        return "calory:"+calory+",protine:"+protine+",fat:"+fat+",carbs:"+carbs;
+    }
 }

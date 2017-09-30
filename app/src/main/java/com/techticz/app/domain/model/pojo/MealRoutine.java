@@ -34,6 +34,10 @@ public class MealRoutine  {
 
     @Ignore
     private Meal meal;
+    @Ignore
+    private boolean eaten;
+    @Ignore
+    private boolean missed;
 
 
     public MealRoutine(int uid, String name, String desc) {
@@ -74,5 +78,26 @@ public class MealRoutine  {
 
     public Meal getMeal() {
         return meal;
+    }
+
+    @Override
+    public String toString(){
+        return "RName:"+name+",ID:"+uid+",Meal:"+meal;
+    }
+
+    public void setEaten(boolean eaten) {
+        this.eaten = eaten;
+    }
+
+    public boolean isEaten() {
+        return eaten;
+    }
+
+    public void setMissed(boolean missed) {
+        this.missed = missed;
+    }
+
+    public boolean isMissed() {
+        return missed;
     }
 }

@@ -71,6 +71,8 @@ public class MainActivity extends BaseActivity implements CheckSystemHealthUseCa
         };
 
         registerReceiver(receiver, filter);
+
+        //handleContnueClick();
     }
 
     private void approve() {

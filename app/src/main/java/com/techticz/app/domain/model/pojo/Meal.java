@@ -137,5 +137,8 @@ public class Meal extends Model {
             }
         }
     }
-
+    @Override
+    public String toString(){
+        return "MName:"+getName()+",ID:"+getUid()+",Foods:"+getAddedFoods().toString();
+    }
 }

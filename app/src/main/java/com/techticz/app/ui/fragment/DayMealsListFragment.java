@@ -193,6 +193,17 @@ public class DayMealsListFragment extends Fragment implements DailyRoutineActivi
         loadRoutinesForDay();
     }
 
+    public MealRoutine getNextMealRoutine() {
+        //get next Routine with meal
+        for(MealRoutine routine: routines){
+            if(routine.getMeal()!= null){
+                return routine;
+            }
+        }
+        //if completed
+        return null;
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
