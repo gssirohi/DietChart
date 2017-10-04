@@ -70,17 +70,22 @@ public class MealRoutineView extends FrameLayout {
                 handleRemoveClick();
             }
         });
-/*
-        if (viewModel.getName().contains("Breakfast")) {
+        if (viewModel.getName().contains("Morning")) {
+            vg.setBackgroundResource(R.drawable.bg_early_morning);
+        } else if (viewModel.getName().contains("Breakfast")) {
             vg.setBackgroundResource(R.drawable.bg_card_13);
         } else if (viewModel.getName().contains("Lunch")) {
-            vg.setBackgroundResource(R.drawable.bg_card_8);
-        } else if (viewModel.getName().contains("Snacks")) {
-            vg.setBackgroundResource(R.drawable.bg_card_11);
-        } else if (viewModel.getName().contains("Dinner")) {
+            vg.setBackgroundResource(R.drawable.bg_afternoon);
+        } else if (viewModel.getName().contains("Snack")) {
+            vg.setBackgroundResource(R.drawable.bg_evening);
+        } else if (viewModel.getName().contains("Pre Dinner")) {
             vg.setBackgroundResource(R.drawable.bg_card_7);
-        }*/
-        vg.setBackgroundResource(R.drawable.bg_card_7);
+        } else if (viewModel.getName().contains("Dinner")) {
+            vg.setBackgroundResource(R.drawable.bg_night);
+        }  else if (viewModel.getName().contains("Bed Time")) {
+            vg.setBackgroundResource(R.drawable.bg_late_night1);
+        }
+       // vg.setBackgroundResource(R.drawable.bg_card_7);
         if (viewModel.getMeal() != null) {
             addMeal.setVisibility(GONE);
             iv_clear.setVisibility(VISIBLE);

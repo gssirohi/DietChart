@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -105,8 +106,8 @@ public class DashBoardFragment extends Fragment implements FetchDayMealListUseCa
     }
     private void initData() {
         mToday = AppUtils.getToday();
-        queryEatenOrMissedRoutine();
         todayRoutines = new ArrayList<MealRoutine>();
+        queryEatenOrMissedRoutine();
         routinesAdapter = new MealRoutinePagerAdapter(todayRoutines, this);
         scroller.setAdapter(routinesAdapter);
 
@@ -179,6 +180,7 @@ public class DashBoardFragment extends Fragment implements FetchDayMealListUseCa
         int today = pref.getInt("today",mToday);
         if(today != mToday){
             //day has changed
+            mStatus = new int[]{0,0,0,0,0,0,0};
             registerEatenOrMissedRoutine();
         } else {
             String s = pref.getString("dayMealsEaten","0:0:0:0:0:0:0");
@@ -186,6 +188,7 @@ public class DashBoardFragment extends Fragment implements FetchDayMealListUseCa
         }
     }
     private String getRoutineStatusString() {
+        if(todayRoutines == null) return "";
         for(MealRoutine r:todayRoutines){
             if(r.isEaten()) {
                 mStatus[r.getUid()-1] = 1;

@@ -115,6 +115,7 @@ public class MainActivity extends BaseActivity implements CheckSystemHealthUseCa
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == Key.LOGIN && resultCode == RESULT_OK){
             if(!TextUtils.isEmpty(LoginUtils.getFirbaseUserId(this))) {
+                getNavigator().navigateToHealthDetailForm();
                 bringMarketPlace();
                 //proceedToApp();
             }
